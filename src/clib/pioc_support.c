@@ -1893,6 +1893,11 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
                 LOG((2, "Calling z5_create"));
                 // TODO: no error code throw here?!
                 z5CreateFile(filename);
+                char* group_tmp = "/group";
+                char* groupname = (char*) malloc (1 + strlen(filename) + strlen(group_tmp) );
+                strcpy(groupname, filename);
+                strcat(groupname, group_tmp);
+                z5CreateGroup(groupname);
                 ierr = 0;
             }
             break;
