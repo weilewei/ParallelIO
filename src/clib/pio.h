@@ -113,6 +113,16 @@
 #define DECOMP_FORTRAN_ORDER_STR "Fortran"
 
 /**
+ * Z5 description structure.
+ */
+#define MAX_FILENAME_LEN_Z5 256
+ typedef struct z5_file_struct
+ {
+    char filename[MAX_FILENAME_LEN_Z5];
+    int file_id;
+ } z5_file_struct;
+
+/**
  * Variable description structure.
  */
 typedef struct var_desc_t
