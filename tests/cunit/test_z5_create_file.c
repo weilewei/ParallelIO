@@ -20,7 +20,7 @@
 #define PIO_TF_MAX_STR_LEN 100
 #define ATTNAME "filename"
 //#define DIMNAME "filename_dim"
-#define DIMNAME "pio_iosys_test_file0.z5/filename_dim"
+//#define DIMNAME "pio_iosys_test_file0.z5/filename_dim"
 /* This creates a netCDF file in the specified format, with some
  * sample values. */
 int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
@@ -40,11 +40,14 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
 //    if (method != PIO_RETURN_ERROR)
 //        return ERR_WRONG;
 //
-//    /* Define a dimension. */
-//    if ((ret = PIOc_def_dim(*ncidp, dimname, PIO_TF_MAX_STR_LEN, &dimid)))
-//        return ret;
-//
-//    /* Define a 1-D variable. */
+    /* Define a dimension. */
+//    dim_desc_t *dim0;
+    char dimname0[] = "lat";
+    int dimval0 = 6969;
+    if ((ret = PIOc_def_dim(*ncidp, dimname0, dimval0, &dimid)))
+        return ret;
+
+    /* Define a 1-D variable. */
 //    if ((ret = PIOc_def_var(ncid, attname, NC_CHAR, 1, &dimid, &varid)))
 //        return ret;
 //
@@ -157,21 +160,28 @@ int main(int argc, char **argv)
         {
             if (iotypes[i] == 5)
             {
-                char fname0[] = "pio_iosys_test_file0.nc";
-                char fname1[] = "pio_iosys_test_file1.nc";
-                char fname2[] = "pio_iosys_test_file2.nc";
+                char fname0[] = "pio_iosys_test_file0";
+                char fname1[] = "pio_iosys_test_file1";
+                char fname2[] = "pio_iosys_test_file2";
+                char* group_tmp = "/group";
+                char* dimname = "dim1";
+//                char* dimname = (char*) malloc (1 + strlen(fname0) + strlen(group_tmp) + strlen(dim_tmp));
+//                strcpy(dimname, fname0);
+//                strcat(dimname, group_tmp);
+//                strcat(dimname, dim_tmp);
+//                printf("dimname is %s\n", dimname);
                 if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname0, ATTNAME,
-                                       DIMNAME, my_rank, &file0id)))
+                                       dimname, my_rank, &file0id)))
                     ERR(ret);
-                printf("1st ncid=%d\n", file0id);
-                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname1, ATTNAME,
-                                       DIMNAME, my_rank, &file1id)))
-                    ERR(ret);
-                printf("2nd ncid=%d\n", file1id);
-                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname2, ATTNAME,
-                                       DIMNAME, my_rank, &file2id)))
-                    ERR(ret);
-                printf("3rd ncid=%d\n", file2id);
+//                printf("1st ncid=%d\n", file0id);
+//                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname1, ATTNAME,
+//                                       dimname, my_rank, &file1id)))
+//                    ERR(ret);
+//                printf("2nd ncid=%d\n", file1id);
+//                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname2, ATTNAME,
+//                                       dimname, my_rank, &file2id)))
+//                    ERR(ret);
+//                printf("3rd ncid=%d\n", file2id);
                 MPI_Barrier(test_comm);
 
 

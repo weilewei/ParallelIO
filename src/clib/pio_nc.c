@@ -19,6 +19,35 @@
 #include <pio_internal.h>
 
 /**
+ * The PIO library maintains its own set of z5 dimid. This is the next
+ * z5 dimid number that will be assigned.
+ */
+/* This is the next z5 dimid that will be used when a dimension is opened or
+   created. We start at 42 so that it will be easy for us to notice */
+int pio_next_z5_dimid = 42;
+extern pio_next_z5_dimid;
+static dim_desc_t *pio_dim_list = NULL;
+static dim_desc_t *current_dimlist = NULL;
+
+/**
+ * Add a new entry to the global list of open dimension list.
+ *
+ * @param file pointer to the dim_desc_t struct for the new dimension.
+ * @author Weile Wei
+ */
+void
+pio_add_to_dim_list(dim_desc_t *dim)
+{
+    assert(dim);
+
+    /* Keep a global pointer to the current file. */
+    current_dimlist = dim;
+
+    /* Add file to list. */
+    HASH_ADD_INT(pio_dim_list, dimid, dim);
+}
+
+/**
  * @defgroup PIO_inq_c Learn About File
  * Learn the number of variables, dimensions, and global atts, and the
  * unlimited dimension in C.
@@ -2086,6 +2115,14 @@ PIOc_def_dim(int ncid, const char *name, PIO_Offset len, int *idp)
             return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
     }
 
+
+    /* Allocate space for the dim info. */
+    dim_desc_t *dim;
+    dim = calloc(sizeof(dim_desc_t), 1);
+    dim->dimval = len;
+    strcpy(dim->dimname, name);
+
+
     /* If this is an IO task, then call the netCDF function. */
     if (ios->ioproc)
     {
@@ -2094,27 +2131,47 @@ PIOc_def_dim(int ncid, const char *name, PIO_Offset len, int *idp)
             ierr = ncmpi_def_dim(file->fh, name, len, idp);
 #endif /* _PNETCDF */
 
-        if (file->iotype != PIO_IOTYPE_PNETCDF && file->do_io)
+        if (file->iotype != PIO_IOTYPE_PNETCDF && file->iotype != PIO_IOTYPE_Z5 && file->do_io)
             ierr = nc_def_dim(file->fh, name, (size_t)len, idp);
-//        if (file->iotype == PIO_IOTYPE_Z5 && file->do_io)
-//        {
-//            z5writeAttributesuint(file->filename, name, (size_t)len);
-//            *idp = rand();
-//            ierr = 0;
-//        }
+#ifdef _Z5
+
+        if (file->iotype == PIO_IOTYPE_Z5)
+        {
+            if (!ios->io_rank)
+            {
+                printf("dim->dimname %s\n", dim->dimname);
+                printf("dim->dimval %d\n", dim->dimval);
+                ierr = 0;
+                printf("2nd ierr is %d\n", ierr);
+            }
+        }
+#endif
     }
 
     /* Broadcast and check the return code. */
     if ((mpierr = MPI_Bcast(&ierr, 1, MPI_INT, ios->ioroot, ios->my_comm)))
         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+    printf("3rd ierr is %d\n", ierr);
     if (ierr)
         return check_netcdf(file, ierr, __FILE__, __LINE__);
 
     /* Broadcast results to all tasks. Ignore NULL parameters. */
-    if (idp)
+    if (idp && file->iotype != PIO_IOTYPE_Z5)
         if ((mpierr = MPI_Bcast(idp , 1, MPI_INT, ios->ioroot, ios->my_comm)))
             check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+#ifdef _Z5
+    /* Assign the PIO ncid. */
+    dim->dimid = pio_next_z5_dimid++;
+    LOG((2, "dim->name = %s dim->dimid = %d", dim->dimname, dim->dimid));
 
+    /* Return the ncid to the caller. */
+    *idp = pio_next_z5_dimid;
+    printf("dim->name = %s dim->dimid = %d\n", dim->dimname, dim->dimid);
+
+    /* Add the struct with this dims info to the global list of
+     * dims. */
+    pio_add_to_dim_list(dim);
+#endif
     LOG((2, "def_dim ierr = %d", ierr));
     return PIO_NOERR;
 }

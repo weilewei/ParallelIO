@@ -113,12 +113,30 @@
 #define DECOMP_FORTRAN_ORDER_STR "Fortran"
 
 #define MAX_Z5_FILENAME_LEN_Z5 256
+#define MAX_Z5_DIMNAME_LEN_Z5 256
+
+typedef struct dim_desc_t
+{
+    char dimname[MAX_Z5_DIMNAME_LEN_Z5];
+
+    int dimid;
+
+    int dimval;
+
+    /** Hash table entry. */
+    UT_hash_handle hh;
+} dim_desc_t;
+
 
 /**
  * Variable description structure.
  */
 typedef struct var_desc_t
 {
+    char* varname;
+
+    struct dim_desc_t *dim_desc_t;
+
     /** Variable ID. */
     int varid;
 

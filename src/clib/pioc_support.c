@@ -1894,6 +1894,7 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
                 // TODO: no error code throw here?!
                 z5CreateFile(filename);
                 strcpy(file->filename, filename);
+                printf("file->filename is %s\n", file->filename);
                 char* group_tmp = "/group";
                 char* groupname = (char*) malloc (1 + strlen(filename) + strlen(group_tmp) );
                 strcpy(groupname, filename);
@@ -1931,6 +1932,16 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
         if ((mpierr = MPI_Bcast(&pio_next_ncid, 1, MPI_INT, ios->ioroot, ios->my_comm)))
             return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
         LOG((3, "createfile bcast pio_next_ncid %d", pio_next_ncid));
+//#ifdef _Z5
+//        int namelen = strlen(file->filename);
+//        if (!mpierr)
+//            mpierr = MPI_Bcast(&namelen, 1, MPI_INT,  ios->compmaster, ios->intercomm);
+//
+//        LOG((3, "createfile z5 bcasting filename %d", file->filename));
+//        if ((mpierr = MPI_Bcast((void *) file->filename, 1, MPI_CHAR, ios->ioroot, ios->my_comm)))
+//            return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+//        LOG((3, "createfile bcast pio_next_ncid %d", pio_next_ncid));
+//#endif
     }
 
     /* Assign the PIO ncid. */
