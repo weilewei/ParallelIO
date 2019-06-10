@@ -112,15 +112,7 @@
  * array-order. */
 #define DECOMP_FORTRAN_ORDER_STR "Fortran"
 
-/**
- * Z5 description structure.
- */
-#define MAX_FILENAME_LEN_Z5 256
- typedef struct z5_file_struct
- {
-    char filename[MAX_FILENAME_LEN_Z5];
-    int file_id;
- } z5_file_struct;
+#define MAX_Z5_FILENAME_LEN_Z5 256
 
 /**
  * Variable description structure.
@@ -576,6 +568,9 @@ typedef struct file_desc_t
 
     /** The ncid that will be returned to the user. */
     int pio_ncid;
+
+    /** The filename that will be returned to the user. */
+    char filename[MAX_Z5_FILENAME_LEN_Z5];
 
     /** The IOTYPE value that was used to open this file. */
     int iotype;

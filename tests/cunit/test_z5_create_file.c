@@ -19,8 +19,8 @@
 /* Used to define netcdf test file. */
 #define PIO_TF_MAX_STR_LEN 100
 #define ATTNAME "filename"
-#define DIMNAME "filename_dim"
-
+//#define DIMNAME "filename_dim"
+#define DIMNAME "pio_iosys_test_file0.z5/filename_dim"
 /* This creates a netCDF file in the specified format, with some
  * sample values. */
 int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
@@ -32,7 +32,7 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     /* Create the file. */
     if ((ret = PIOc_createfile(iosysid, ncidp, &format, filename, NC_CLOBBER)))
         return ret;
-//    printf("end of PIOc_createfile ret:%d\n", ret);
+//    printf("end of PIOc_createfile ncidp:%d\n", *ncidp);
 //    /* Use the ncid to set the IO system error handler. This function
 //     * is deprecated. */
 //    PIOc_Set_File_Error_Handling(ncid, PIO_RETURN_ERROR);
@@ -41,7 +41,7 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
 //        return ERR_WRONG;
 //
 //    /* Define a dimension. */
-//    if ((ret = PIOc_def_dim(ncid, dimname, PIO_TF_MAX_STR_LEN, &dimid)))
+//    if ((ret = PIOc_def_dim(*ncidp, dimname, PIO_TF_MAX_STR_LEN, &dimid)))
 //        return ret;
 //
 //    /* Define a 1-D variable. */
@@ -149,29 +149,34 @@ int main(int argc, char **argv)
         if ((ret = PIOc_Init_Intracomm(test_comm, 4, 1, 0, 1, &iosysid_world)))
             ERR(ret);
 
-        z5_file_struct z5_file0;
-        z5_file_struct z5_file1;
-        z5_file_struct z5_file2;
+        int file0id;
+        int file1id;
+        int file2id;
+
         for (int i = 0; i < num_flavors; i++)
         {
             if (iotypes[i] == 5)
             {
-                strcpy(z5_file0.filename, "pio_iosys_test_file0.z5");
-                strcpy(z5_file1.filename, "pio_iosys_test_file1.z5");
-                strcpy(z5_file2.filename, "pio_iosys_test_file2.z5");
-                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], z5_file0.filename, ATTNAME,
-                                       DIMNAME, my_rank, &z5_file0.file_id)))
+                char fname0[] = "pio_iosys_test_file0.nc";
+                char fname1[] = "pio_iosys_test_file1.nc";
+                char fname2[] = "pio_iosys_test_file2.nc";
+                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname0, ATTNAME,
+                                       DIMNAME, my_rank, &file0id)))
                     ERR(ret);
-                printf("1st ncid=%d\n", z5_file0.file_id);
-                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], z5_file1.filename, ATTNAME,
-                                       DIMNAME, my_rank, &z5_file1.file_id)))
+                printf("1st ncid=%d\n", file0id);
+                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname1, ATTNAME,
+                                       DIMNAME, my_rank, &file1id)))
                     ERR(ret);
-                printf("2nd ncid=%d\n", z5_file1.file_id);
-                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], z5_file2.filename, ATTNAME,
-                                       DIMNAME, my_rank, &z5_file2.file_id)))
+                printf("2nd ncid=%d\n", file1id);
+                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname2, ATTNAME,
+                                       DIMNAME, my_rank, &file2id)))
                     ERR(ret);
-                printf("3rd ncid=%d\n", z5_file2.file_id);
+                printf("3rd ncid=%d\n", file2id);
                 MPI_Barrier(test_comm);
+
+
+//                if ((ret = PIOc_def_var(z5_file0.z5id, z5_var1.varname, PIO_FLOAT, 1, &dimid, &z5_var1.varid)))
+//                    return ret;
 //            /* Now check the first file. */
 //            int ncid;
 //            if ((ret = open_and_check_file(test_comm, iosysid_world, iotypes[i], &ncid, fname0,

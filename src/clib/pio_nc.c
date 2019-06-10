@@ -2096,6 +2096,12 @@ PIOc_def_dim(int ncid, const char *name, PIO_Offset len, int *idp)
 
         if (file->iotype != PIO_IOTYPE_PNETCDF && file->do_io)
             ierr = nc_def_dim(file->fh, name, (size_t)len, idp);
+//        if (file->iotype == PIO_IOTYPE_Z5 && file->do_io)
+//        {
+//            z5writeAttributesuint(file->filename, name, (size_t)len);
+//            *idp = rand();
+//            ierr = 0;
+//        }
     }
 
     /* Broadcast and check the return code. */
