@@ -13,6 +13,7 @@
 #include "z5/dataset_factory.hxx"
 #include "z5/file.hxx"
 #include "z5/groups.hxx"
+#include "z5/attributes.hxx"
 #include "z5/compression/zlib_compressor.hxx"
 #include "z5/types/types.hxx"
 #endif
@@ -21,27 +22,55 @@
 namespace z5 {
     extern "C" {
 #endif
-    void z5CreateFile(char* path);
+        void z5CreateFile(char* path);
 
-    void z5CreateGroup(char* path);
+        void z5CreateGroup(char* path);
 
-    void z5CreateFloatDataset(char *path, unsigned int ndim, size_t *shape, size_t *chunks, int cuseZlib, int level);
+        void z5CreateFloatDataset(char *path, unsigned int ndim, size_t *shape, size_t *chunks, int cuseZlib, int level);
 
-    void z5WriteFloatSubarray(char *path, float *array, unsigned int ndim, size_t *shape, size_t *offset);
+        void z5WriteFloatSubarray(char *path, float *array, unsigned int ndim, size_t *shape, size_t *offset);
 
-    void z5ReadFloatSubarray(char *path, float *array, unsigned int ndim, size_t *shape, size_t *offset);
+        void z5ReadFloatSubarray(char *path, float *array, unsigned int ndim, size_t *shape, size_t *offset);
 
-    void z5CreateInt64Dataset(char *path, unsigned int ndim, size_t *shape, size_t *chunks, int cuseZlib, int level);
+        void z5CreateInt64Dataset(char *path, unsigned int ndim, size_t *shape, size_t *chunks, int cuseZlib, int level);
 
-    void z5WriteInt64Subarray(char *path, long long int *array, unsigned int ndim, size_t *shape, size_t *offset);
+        void z5WriteInt64Subarray(char *path, long long int *array, unsigned int ndim, size_t *shape, size_t *offset);
 
-    void z5ReadInt64Subarray(char *path, long long int *array, unsigned int ndim, size_t *shape, size_t *offset);
+        void z5ReadInt64Subarray(char *path, long long int *array, unsigned int ndim, size_t *shape, size_t *offset);
 
-    size_t z5GetFileSize(char *path);
+        size_t z5GetFileSize(char *path);
 
-    void z5Delete(char *path );
+        void z5Delete(char *path );
+
+        void z5writeAttributesString(char *path, const char *name, const char *value);
+
+        void z5writeAttributesshort(char *path, const char *name, const short *value);
+
+        void z5writeAttributesint(char *path, const char *name, const int *value);
+
+        void z5writeAttributeslong(char *path, const char *name, const long *value);
+
+        void z5writeAttributesfloat(char *path, const char *name, const float *value);
+
+        void z5writeAttributesdouble(char *path, const char *name, const double *value);
+
+        void z5writeAttributesushort(char *path, const char *name, const unsigned short *value);
+
+        void z5writeAttributesusint(char *path, const char *name, const unsigned short int *value);
+
+        void z5writeAttributeslonglong(char *path, const char *name, const long long *value);
+
+        void z5writeAttributesulonglong(char *path, const char *name, const unsigned long long *value);
+
+        void z5writeAttributesuint(char *path, const char *name, const unsigned int *value);
+
+        // read attributes //
+
+        void z5readAttributesWithKeys(char *path, char *keys[], int keys_sz);
+
+        void z5readAttributes(char *path);
 #ifdef __cplusplus
-    }
+}
 }
 #endif
 #endif //CZ5TEST_Z5WRAPPER_H

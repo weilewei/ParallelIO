@@ -112,11 +112,31 @@
  * array-order. */
 #define DECOMP_FORTRAN_ORDER_STR "Fortran"
 
+#define MAX_Z5_FILENAME_LEN_Z5 256
+#define MAX_Z5_DIMNAME_LEN_Z5 256
+
+typedef struct dim_desc_t
+{
+    char dimname[MAX_Z5_DIMNAME_LEN_Z5];
+
+    int dimid;
+
+    int dimval;
+
+    /** Hash table entry. */
+    UT_hash_handle hh;
+} dim_desc_t;
+
+#define VARIABLEGROUP "/variables/"
 /**
  * Variable description structure.
  */
 typedef struct var_desc_t
 {
+    char* varname;
+
+    struct dim_desc_t *dim_desc_t;
+
     /** Variable ID. */
     int varid;
 
@@ -566,6 +586,9 @@ typedef struct file_desc_t
 
     /** The ncid that will be returned to the user. */
     int pio_ncid;
+
+    /** The filename that will be returned to the user. */
+    char filename[MAX_Z5_FILENAME_LEN_Z5];
 
     /** The IOTYPE value that was used to open this file. */
     int iotype;
