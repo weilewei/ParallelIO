@@ -25,10 +25,12 @@
 /* This is the next z5 dimid that will be used when a dimension is opened or
    created. We start at 42 so that it will be easy for us to notice */
 int pio_next_z5_dimid = 42;
+int pio_next_z5_varid = 101;
 extern pio_next_z5_dimid;
+extern pio_next_z5_varid;
 static dim_desc_t *pio_dim_list = NULL;
 static dim_desc_t *current_dimlist = NULL;
-
+#define VARGROUPNAME "/variable/"
 /**
  * Add a new entry to the global list of open dimension list.
  *
@@ -45,6 +47,53 @@ pio_add_to_dim_list(dim_desc_t *dim)
 
     /* Add file to list. */
     HASH_ADD_INT(pio_dim_list, dimid, dim);
+}
+
+/**
+ * Given dimid, find the dim_desc_t data. The dimid
+ * used is the interally generated dimid.
+ *
+ * @param dimid the PIO assigned dimid.
+ * @param cdim1 pointer to a pointer to a dim_desc_t. The pointer
+ * will get a copy of the pointer to the dim info.
+ *
+ * @returns 0 for success, error code otherwise.
+ * @author Weile Wei
+ */
+int
+pio_get_dim(int dimid, dim_desc_t **cdim1)
+{
+    dim_desc_t *cdim = NULL;
+
+    LOG((2, "pio_get_dim dimid = %d", dimid));
+
+    /* Caller must provide this. */
+    if (!cdim1)
+        return PIO_EINVAL;
+
+    /* Find the file pointer. */
+    if (current_dimlist && current_dimlist->dimid == dimid)
+        cdim = current_dimlist;
+    else
+        HASH_FIND_INT(pio_dim_list, &dimid, cdim);
+
+    /* If not found, return error. */
+    if (!cdim)
+        return PIO_EBADID;
+
+    current_dimlist = cdim;
+
+//    /* We depend on every file having a pointer to the iosystem. */
+//    if (!cfile->iosystem)
+//        return PIO_EINVAL;
+
+//    /* Let's just ensure we have a valid IO type. */
+//    pioassert(iotype_is_valid(cfile->iotype), "invalid IO type", __FILE__, __LINE__);
+
+    /* Copy pointer to file info. */
+    *cdim1 = cdim;
+
+    return PIO_NOERR;
 }
 
 /**
@@ -2134,15 +2183,12 @@ PIOc_def_dim(int ncid, const char *name, PIO_Offset len, int *idp)
         if (file->iotype != PIO_IOTYPE_PNETCDF && file->iotype != PIO_IOTYPE_Z5 && file->do_io)
             ierr = nc_def_dim(file->fh, name, (size_t)len, idp);
 #ifdef _Z5
-
+        // TODO: Z5Z5 should I write these codes?
         if (file->iotype == PIO_IOTYPE_Z5)
         {
             if (!ios->io_rank)
             {
-                printf("dim->dimname %s\n", dim->dimname);
-                printf("dim->dimval %d\n", dim->dimval);
                 ierr = 0;
-                printf("2nd ierr is %d\n", ierr);
             }
         }
 #endif
@@ -2151,7 +2197,7 @@ PIOc_def_dim(int ncid, const char *name, PIO_Offset len, int *idp)
     /* Broadcast and check the return code. */
     if ((mpierr = MPI_Bcast(&ierr, 1, MPI_INT, ios->ioroot, ios->my_comm)))
         return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
-    printf("3rd ierr is %d\n", ierr);
+
     if (ierr)
         return check_netcdf(file, ierr, __FILE__, __LINE__);
 
@@ -2165,8 +2211,7 @@ PIOc_def_dim(int ncid, const char *name, PIO_Offset len, int *idp)
     LOG((2, "dim->name = %s dim->dimid = %d", dim->dimname, dim->dimid));
 
     /* Return the ncid to the caller. */
-    *idp = pio_next_z5_dimid;
-    printf("dim->name = %s dim->dimid = %d\n", dim->dimname, dim->dimid);
+    *idp = dim->dimid;
 
     /* Add the struct with this dims info to the global list of
      * dims. */
@@ -2201,6 +2246,7 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
 {
     iosystem_desc_t *ios;      /* Pointer to io system information. */
     file_desc_t *file;         /* Pointer to file information. */
+    dim_desc_t *dim;           /* Pointer to dimension information. */
     int invalid_unlim_dim = 0; /* True invalid dims are used. */
     int varid;                 /* The varid of the created var. */
     int rec_var = 0;           /* Non-zero if this var uses unlimited dim. */
@@ -2245,8 +2291,18 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                 return check_mpi(ios, NULL, mpierr, __FILE__, __LINE__);
 
         /* How many unlimited dims are present in the file? */
-        if ((ierr = PIOc_inq_unlimdims(ncid, &nunlimdims, NULL)))
-            return check_netcdf(file, ierr, __FILE__, __LINE__);
+        if (file->iotype != PIO_IOTYPE_Z5)
+        {
+            if ((ierr = PIOc_inq_unlimdims(ncid, &nunlimdims, NULL)))
+                return check_netcdf(file, ierr, __FILE__, __LINE__);
+        }
+
+#ifdef _Z5
+        nunlimdims = 0;
+
+//        if ((ierr = pio_get_dim(dimidsp[0], &dim)))
+//            return ierr;
+#endif
 
         if (nunlimdims)
         {
@@ -2341,7 +2397,7 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
             ierr = ncmpi_def_var(file->fh, name, xtype, ndims, dimidsp, &varid);
 #endif /* _PNETCDF */
 
-        if (file->iotype != PIO_IOTYPE_PNETCDF && file->do_io)
+        if (file->iotype != PIO_IOTYPE_PNETCDF && file->iotype != PIO_IOTYPE_Z5 && file->do_io)
             ierr = nc_def_var(file->fh, name, xtype, ndims, dimidsp, &varid);
 #ifdef _NETCDF4
         /* For netCDF-4 serial files, turn on compression for this variable. */
@@ -2352,6 +2408,54 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
         if (!ierr && file->iotype == PIO_IOTYPE_NETCDF4P)
             ierr = nc_var_par_access(file->fh, varid, NC_COLLECTIVE);
 #endif /* _NETCDF4 */
+
+#ifdef _Z5
+        if (file->iotype == PIO_IOTYPE_Z5 && !ios->io_rank)
+        {
+            //TODO: Z5Z5
+            char* datasetname = (char*) malloc (1 + strlen(file->filename) + strlen(VARIABLEGROUP) + strlen(name));
+            strcpy(datasetname, file->filename);
+            strcat(datasetname, VARIABLEGROUP);
+            strcat(datasetname, name);
+            int* shape[ndims];
+            int* chunk[ndims];
+            int niostasks = ios->num_iotasks;
+            for (int i = 0; i < ndims; i++)
+            {
+                if ((ierr = pio_get_dim(dimidsp[i], &dim)))
+                    return ierr;
+                shape[i] = dim->dimval;
+                chunk[i] = shape[i];
+            }
+            if (ndims <= 2)
+            {
+                switch (xtype)
+                {
+                    case NC_INT: // 4
+                        z5CreateInt64Dataset(datasetname, ndims, shape, shape, 1, 1);
+                    case NC_FLOAT: // 5
+                        z5CreateFloatDataset(datasetname, ndims, shape, shape, 1, 1);
+                }
+
+            }
+            else if (ndims > 2)
+            {
+                chunk[0] = (int) (shape[0]) / niostasks;
+                switch (xtype)
+                {
+                    case NC_INT: // 4
+                        z5CreateInt64Dataset(datasetname, ndims, shape, shape, 1, 1);
+                    case NC_FLOAT: // 5
+                        z5CreateFloatDataset(datasetname, ndims, shape, shape, 1, 1);
+                }
+            }
+            else {
+                printf("ooops\n");
+            }
+            varid = pio_next_z5_varid++;
+            ierr =  0;
+        }
+#endif
     }
 
     /* Broadcast and check the return code. */

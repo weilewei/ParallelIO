@@ -18,7 +18,7 @@
 
 /* Used to define netcdf test file. */
 #define PIO_TF_MAX_STR_LEN 100
-#define ATTNAME "filename"
+#define ATTNAME "var0"
 //#define DIMNAME "filename_dim"
 //#define DIMNAME "pio_iosys_test_file0.z5/filename_dim"
 /* This creates a netCDF file in the specified format, with some
@@ -26,7 +26,7 @@
 int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
                 char *attname, char *dimname, int my_rank, int *ncidp)
 {
-    int ncid, varid, dimid;
+    int ncid, varid, dimid0, dimid1;
     int ret;
 
     /* Create the file. */
@@ -43,14 +43,24 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     /* Define a dimension. */
 //    dim_desc_t *dim0;
     char dimname0[] = "lat";
-    int dimval0 = 6969;
-    if ((ret = PIOc_def_dim(*ncidp, dimname0, dimval0, &dimid)))
+    int dimval0 = 4001;
+
+    char dimname1[] = "lon";
+    int dimval1 = 7878;
+
+    if ((ret = PIOc_def_dim(*ncidp, dimname0, dimval0, &dimid0)))
         return ret;
 
+    if ((ret = PIOc_def_dim(*ncidp, dimname1, dimval1, &dimid1)))
+        return ret;
+
+    int twod_dimids[2];
+    twod_dimids[0] = dimid0;
+    twod_dimids[1] = dimid1;
+
     /* Define a 1-D variable. */
-//    if ((ret = PIOc_def_var(ncid, attname, NC_CHAR, 1, &dimid, &varid)))
-//        return ret;
-//
+    if ((ret = PIOc_def_var(*ncidp, attname, NC_INT, 2, &twod_dimids, &varid)))
+        return ret;
 //    /* Write an attribute. */
 //    if ((ret = PIOc_put_att_text(ncid, varid, attname, strlen(filename), filename)))
 //        return ret;

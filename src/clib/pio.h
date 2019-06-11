@@ -127,7 +127,7 @@ typedef struct dim_desc_t
     UT_hash_handle hh;
 } dim_desc_t;
 
-
+#define VARIABLEGROUP "/variables/"
 /**
  * Variable description structure.
  */

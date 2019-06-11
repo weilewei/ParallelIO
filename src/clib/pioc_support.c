@@ -1894,11 +1894,9 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
                 // TODO: no error code throw here?!
                 z5CreateFile(filename);
                 strcpy(file->filename, filename);
-                printf("file->filename is %s\n", file->filename);
-                char* group_tmp = "/group";
-                char* groupname = (char*) malloc (1 + strlen(filename) + strlen(group_tmp) );
+                char* groupname = (char*) malloc (1 + strlen(filename) + strlen(VARIABLEGROUP) );
                 strcpy(groupname, filename);
-                strcat(groupname, group_tmp);
+                strcat(groupname, VARIABLEGROUP);
                 z5CreateGroup(groupname);
                 ierr = 0;
             }
