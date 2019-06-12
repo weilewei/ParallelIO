@@ -71,7 +71,16 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     double attributeval1 = 42.0;
     if ((ret = PIOc_put_att_double(*ncidp, varid, attributename1, NC_DOUBLE, 1, &attributeval1)))
         return ret;
-//
+    PIO_Offset start[2] = {1, 0};
+    PIO_Offset count[2] = {1, 2};
+    float float_array[2][2];
+
+    MPI_Barrier(test_comm);
+
+    if ((ret = PIOc_put_vara_int(*ncidp, varid, start, count, (float *)float_array)))
+        ERR(ret);
+    //PIOc_put_vars_tc
+
     /* End define mode. */
 //    if ((ret = PIOc_enddef(ncid)))
 //        return ret;

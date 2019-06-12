@@ -137,6 +137,14 @@ typedef struct var_desc_t
 
     struct dim_desc_t *dim_desc_t;
 
+    int ndims;
+
+    nc_type xtypep;
+
+    int *dimidsp;
+
+    int natts;
+
     /** Variable ID. */
     int varid;
 

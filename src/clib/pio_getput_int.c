@@ -229,6 +229,7 @@ PIOc_put_att_tc(int ncid, int varid, const char *name, nc_type atttype,
                     }
                     break;
             }
+            vdesc->natts++;
             ierr = 0;
         }
 #endif
@@ -984,11 +985,11 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
     if ((ierr = pio_get_file(ncid, &file)))
         return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
     ios = file->iosystem;
-
+printf("checking point 1\n");
     /* User must provide a place to put some data. */
     if (!buf)
         return pio_err(ios, file, PIO_EINVAL, __FILE__, __LINE__);
-
+printf("vartype is %d\n", vartype);
     /* Run these on all tasks if async is not in use, but only on
      * non-IO tasks if async is in use. */
     if (!ios->async || !ios->ioproc)
@@ -996,7 +997,10 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
         /* Get the type of this var. */
         if ((ierr = PIOc_inq_vartype(ncid, varid, &vartype)))
             return check_netcdf(file, ierr, __FILE__, __LINE__);
-
+printf("checking point 1.1\n");
+//printf("ncid is %d\n", ncid);
+//printf("varid is %d\n", varid);
+printf("vartype is %d\n", vartype);
         /* If no type was specified, use the var type. */
         if (xtype == NC_NAT)
             xtype = vartype;
@@ -1004,7 +1008,7 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
         /* Get the number of dims for this var. */
         if ((ierr = PIOc_inq_varndims(ncid, varid, &ndims)))
             return check_netcdf(file, ierr, __FILE__, __LINE__);
-
+printf("checking point 1.2\n");
         /* Get the length of the data type. */
         if (xtype == PIO_LONG_INTERNAL)
             typelen = sizeof(long int);
@@ -1013,7 +1017,7 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
             if ((ierr = PIOc_inq_type(ncid, xtype, NULL, &typelen)))
                 return check_netcdf(file, ierr, __FILE__, __LINE__);
         }
-
+printf("checking point 1.3\n");
         LOG((2, "ndims = %d typelen = %d", ndims, typelen));
 
         /* How many elements of data? If no count array was passed,
@@ -1022,7 +1026,7 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
             for (int vd = 0; vd < ndims; vd++)
                 num_elem *= count[vd];
     }
-
+printf("checking point 2\n");
     /* If async is in use, and this is not an IO task, bcast the parameters. */
     if (ios->async)
     {
@@ -1068,7 +1072,7 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
                 mpierr = MPI_Bcast((void *)buf, num_elem * typelen, MPI_BYTE, ios->compmaster,
                                    ios->intercomm);
         }
-
+printf("checking point 3\n");
         /* Handle MPI errors. */
         if ((mpierr2 = MPI_Bcast(&mpierr, 1, MPI_INT, ios->comproot, ios->my_comm)))
             return check_mpi(NULL, file, mpierr2, __FILE__, __LINE__);
@@ -1212,7 +1216,7 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
         }
 #endif /* _PNETCDF */
 
-        if (file->iotype != PIO_IOTYPE_PNETCDF && file->do_io)
+        if (file->iotype != PIO_IOTYPE_PNETCDF && file->iotype != PIO_IOTYPE_Z5  && file->do_io)
         {
             LOG((2, "PIOc_put_vars_tc calling netcdf function file->iotype = %d",
                  file->iotype));
@@ -1277,6 +1281,14 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
             }
             LOG((2, "PIOc_put_vars_tc io_rank 0 done with netcdf call, ierr=%d", ierr));
         }
+
+#ifdef _Z5
+        if (file->iotype == PIO_IOTYPE_Z5&& file->do_io)
+        {
+            printf("Z5 is here\n");
+            ierr = 0;
+        }
+#endif
 
         /* Free malloced resources. */
         if (ndims && !stride_present)

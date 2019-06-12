@@ -995,7 +995,7 @@ PIOc_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
         }
 #endif /* _PNETCDF */
 
-        if (file->iotype != PIO_IOTYPE_PNETCDF && file->do_io)
+        if (file->iotype != PIO_IOTYPE_PNETCDF && file->iotype != PIO_IOTYPE_Z5 && file->do_io)
         {
             ierr = nc_inq_varndims(file->fh, varid, &ndims);
             LOG((3, "nc_inq_varndims called ndims = %d", ndims));
@@ -1024,6 +1024,24 @@ PIOc_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
                 }
             }
         }
+
+#ifdef _Z5
+
+        if (file->iotype == PIO_IOTYPE_Z5 && file->do_io && !ios->io_rank)
+        {
+            var_desc_t *vdesc;
+            if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
+                return pio_err(ios, file, ierr, __FILE__, __LINE__);
+            ndimsp = vdesc->ndims;
+            xtypep = vdesc->xtypep;
+            printf("xtypep is %d\n", xtypep);
+            dimidsp = vdesc->dimidsp;
+            nattsp = vdesc->natts;
+            name = (char*) malloc (1 + strlen(vdesc->varname));
+            strcpy(name, vdesc->varname);
+            ierr = 0;
+        }
+#endif
         if (ndimsp)
             LOG((2, "PIOc_inq_var ndims = %d ierr = %d", *ndimsp, ierr));
     }
@@ -2446,21 +2464,15 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                 switch (xtype)
                 {
                     case NC_INT: // 4
-                        z5CreateInt64Dataset(datasetname, ndims, shape, shape, 1, 1);
+                        z5CreateInt64Dataset(datasetname, ndims, shape, chunk, 1, 1);
                     case NC_FLOAT: // 5
-                        z5CreateFloatDataset(datasetname, ndims, shape, shape, 1, 1);
+                        z5CreateFloatDataset(datasetname, ndims, shape, chunk, 1, 1);
                 }
             }
             else {
                 printf("ooops\n");
             }
             varid = pio_next_z5_varid++;
-//            var_desc_t* v;
-//            if ((ierr = get_var_desc( varid, &file->varlist, &v)))
-//                return ierr;
-//            v->varname = (char*) malloc (1 + strlen(datasetname));
-//            strcpy(v->varname, datasetname);
-//            printf("I am here\n");
             ierr =  0;
         }
 #endif
@@ -2494,6 +2506,16 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                 return pio_err(ios, file, ierr, __FILE__, __LINE__);
             vdesc->varname = (char*) malloc (1 + strlen(datasetname));
             strcpy(vdesc->varname, datasetname);
+            vdesc->ndims = ndims;
+            vdesc->xtypep = xtype;
+            vdesc->dimidsp = dimidsp;
+            vdesc->natts = 0;
+//            printf("vdesc->ndims is %d\n", vdesc->ndims);
+//            printf("vdesc->xtypep is %d\n", vdesc->xtypep);
+//            for (int i = 0; i < vdesc->ndims; i++)
+//            {
+//                printf("dimid %d is %d\n", i, vdesc->dimidsp[i]);
+//            }
         }
     }
 
