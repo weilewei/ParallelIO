@@ -66,6 +66,11 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     char attributeval0[] = "noon";
     if ((ret = PIOc_put_att_text(*ncidp, varid, attributename0, strlen(filename), attributeval0)))
         return ret;
+
+    char attributename1[] = "long";
+    double attributeval1 = 42.0;
+    if ((ret = PIOc_put_att_double(*ncidp, varid, attributename1, NC_DOUBLE, 1, &attributeval1)))
+        return ret;
 //
     /* End define mode. */
 //    if ((ret = PIOc_enddef(ncid)))
