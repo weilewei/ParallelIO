@@ -157,7 +157,7 @@ PIOc_put_att_tc(int ncid, int varid, const char *name, nc_type atttype,
         }
 #endif /* _PNETCDF */
 
-        if (file->iotype != PIO_IOTYPE_PNETCDF && file->do_io)
+        if (file->iotype != PIO_IOTYPE_PNETCDF && file->iotype != PIO_IOTYPE_Z5 && file->do_io)
         {
             switch(memtype)
             {
@@ -207,6 +207,23 @@ PIOc_put_att_tc(int ncid, int varid, const char *name, nc_type atttype,
                 return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
             }
         }
+#ifdef _Z5 /* _Z5*/
+        if (file->iotype == PIO_IOTYPE_Z5 && file->do_io && !ios->io_rank)
+        {
+            switch(memtype)
+            {
+                case NC_CHAR:
+                    {
+                        printf("hihihihihi\n");
+                        var_desc_t *vdesc;
+                        if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
+                            return pio_err(ios, file, ierr, __FILE__, __LINE__);
+                        z5writeAttributesString(vdesc->varname, "time", op);
+                        ierr = 0;
+                    }
+            }
+        }
+#endif
     }
 
     /* Broadcast and check the return code. */

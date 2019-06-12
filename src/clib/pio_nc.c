@@ -2256,6 +2256,8 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
     int mpierr = MPI_SUCCESS, mpierr2;  /* Return code from MPI function codes. */
     int ierr;                  /* Return code from function calls. */
 
+    char* datasetname;
+
     /* Get the file information. */
     if ((ierr = pio_get_file(ncid, &file)))
         return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
@@ -2413,7 +2415,7 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
         if (file->iotype == PIO_IOTYPE_Z5 && !ios->io_rank)
         {
             //TODO: Z5Z5
-            char* datasetname = (char*) malloc (1 + strlen(file->filename) + strlen(VARIABLEGROUP) + strlen(name));
+            datasetname = (char*) malloc (1 + strlen(file->filename) + strlen(VARIABLEGROUP) + strlen(name));
             strcpy(datasetname, file->filename);
             strcat(datasetname, VARIABLEGROUP);
             strcat(datasetname, name);
@@ -2453,6 +2455,12 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                 printf("ooops\n");
             }
             varid = pio_next_z5_varid++;
+//            var_desc_t* v;
+//            if ((ierr = get_var_desc( varid, &file->varlist, &v)))
+//                return ierr;
+//            v->varname = (char*) malloc (1 + strlen(datasetname));
+//            strcpy(v->varname, datasetname);
+//            printf("I am here\n");
             ierr =  0;
         }
 #endif
@@ -2475,6 +2483,21 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                                mpi_type_size, &file->varlist)))
         return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
     file->nvars++;
+
+#ifdef _Z5
+    if (ios->ioproc)
+    {
+        if (file->iotype == PIO_IOTYPE_Z5 && !ios->io_rank)
+        {
+            var_desc_t *vdesc;
+            if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
+                return pio_err(ios, file, ierr, __FILE__, __LINE__);
+            vdesc->varname = (char*) malloc (1 + strlen(datasetname));
+            strcpy(vdesc->varname, datasetname);
+        }
+    }
+
+#endif
 
     return PIO_NOERR;
 }

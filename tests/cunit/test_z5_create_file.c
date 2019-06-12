@@ -61,9 +61,11 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     /* Define a 1-D variable. */
     if ((ret = PIOc_def_var(*ncidp, attname, NC_INT, 2, &twod_dimids, &varid)))
         return ret;
-//    /* Write an attribute. */
-//    if ((ret = PIOc_put_att_text(ncid, varid, attname, strlen(filename), filename)))
-//        return ret;
+    /* Write an attribute. */
+    char attributename0[] = "time";
+    char attributeval0[] = "noon";
+    if ((ret = PIOc_put_att_text(*ncidp, varid, attributename0, strlen(filename), attributeval0)))
+        return ret;
 //
     /* End define mode. */
 //    if ((ret = PIOc_enddef(ncid)))
