@@ -32,6 +32,7 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     /* Create the file. */
     if ((ret = PIOc_createfile(iosysid, ncidp, &format, filename, NC_CLOBBER)))
         return ret;
+    MPI_Barrier(comm);
 //    printf("end of PIOc_createfile ncidp:%d\n", *ncidp);
 //    /* Use the ncid to set the IO system error handler. This function
 //     * is deprecated. */
@@ -43,10 +44,10 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     /* Define a dimension. */
 //    dim_desc_t *dim0;
     char dimname0[] = "lat";
-    int dimval0 = 4001;
+    int dimval0 = 100;
 
     char dimname1[] = "lon";
-    int dimval1 = 7878;
+    int dimval1 = 200;
 
     if ((ret = PIOc_def_dim(*ncidp, dimname0, dimval0, &dimid0)))
         return ret;
@@ -57,10 +58,11 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     int twod_dimids[2];
     twod_dimids[0] = dimid0;
     twod_dimids[1] = dimid1;
-
+    MPI_Barrier(comm);
     /* Define a 1-D variable. */
     if ((ret = PIOc_def_var(*ncidp, attname, NC_INT, 2, &twod_dimids, &varid)))
         return ret;
+    MPI_Barrier(comm);
     /* Write an attribute. */
     char attributename0[] = "time";
     char attributeval0[] = "noon";
@@ -71,13 +73,22 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     double attributeval1 = 42.0;
     if ((ret = PIOc_put_att_double(*ncidp, varid, attributename1, NC_DOUBLE, 1, &attributeval1)))
         return ret;
-    PIO_Offset start[2] = {1, 0};
-    PIO_Offset count[2] = {1, 2};
-    float float_array[2][2];
+    // TODO: Z5Z5 how to get number of ranks
+    printf("I am rank: %d\n", my_rank);
+    long long int start[] = {my_rank*100/4, 50};
+    long long int count[] = {25, 50};
+    int int_array[100][200];
+    for (int i = 0; i < 100; i++)
+    {
+        for (int j = 0; j < 200; j++)
+        {
+            int_array[i][j]=42;
+        }
+    }
+//    MPI_Comm test_comm;
+    MPI_Barrier(comm);
 
-    MPI_Barrier(test_comm);
-
-    if ((ret = PIOc_put_vara_int(*ncidp, varid, start, count, (float *)float_array)))
+    if ((ret = PIOc_put_vara_int(*ncidp, varid, start, count, (int *)int_array)))
         ERR(ret);
     //PIOc_put_vars_tc
 

@@ -1811,7 +1811,9 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
     file->iotype = *iotype;
     file->buffer = NULL;
     file->writable = 1;
-
+#ifdef _Z5
+    strcpy(file->filename, filename);
+#endif
     /* Set to true if this task should participate in IO (only true for
      * one task with netcdf serial files. */
     if (file->iotype == PIO_IOTYPE_NETCDF4P || file->iotype == PIO_IOTYPE_PNETCDF ||
@@ -1893,7 +1895,6 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
                 LOG((2, "Calling z5_create"));
                 // TODO: no error code throw here?!
                 z5CreateFile(filename);
-                strcpy(file->filename, filename);
                 char* groupname = (char*) malloc (1 + strlen(filename) + strlen(VARIABLEGROUP) );
                 strcpy(groupname, filename);
                 strcat(groupname, VARIABLEGROUP);

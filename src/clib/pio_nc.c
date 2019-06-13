@@ -1027,18 +1027,41 @@ PIOc_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
 
 #ifdef _Z5
 
-        if (file->iotype == PIO_IOTYPE_Z5 && file->do_io && !ios->io_rank)
+        if (file->iotype == PIO_IOTYPE_Z5 && file->do_io)
         {
             var_desc_t *vdesc;
             if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
                 return pio_err(ios, file, ierr, __FILE__, __LINE__);
-            ndimsp = vdesc->ndims;
-            xtypep = vdesc->xtypep;
-            printf("xtypep is %d\n", xtypep);
-            dimidsp = vdesc->dimidsp;
-            nattsp = vdesc->natts;
-            name = (char*) malloc (1 + strlen(vdesc->varname));
-            strcpy(name, vdesc->varname);
+
+            if (!ierr)
+            {
+                if (name)
+                {
+                    name = (char*) malloc (1 + strlen(vdesc->varname));
+                    strcpy(name, vdesc->varname);
+                }
+                if (xtypep)
+                {
+                    *xtypep = vdesc->xtypep;
+                }
+                if (ndimsp)
+                {
+                    *ndimsp = vdesc->ndims;
+                }
+                if (dimidsp)
+                {
+                    ndims = vdesc->ndims;
+                    printf("before loop\n");
+//                    for (int d = 0; d < ndims; d++)
+//                        dimidsp[d] = vdesc->dimidsp[d];
+                    dimidsp = vdesc->dimidsp;
+                    printf("after loop\n");
+                }
+                if (nattsp)
+                {
+                    *nattsp = vdesc->natts;
+                }
+            }
             ierr = 0;
         }
 #endif
@@ -1075,6 +1098,7 @@ PIOc_inq_var(int ncid, int varid, char *name, nc_type *xtypep, int *ndimsp,
             return check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
         LOG((2, "PIOc_inq_var Bcast ndims = %d", *ndimsp));
     }
+
     if (dimidsp)
     {
         if ((mpierr = MPI_Bcast(&ndims, 1, MPI_INT, ios->ioroot, ios->my_comm)))
@@ -2274,12 +2298,19 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
     int mpierr = MPI_SUCCESS, mpierr2;  /* Return code from MPI function codes. */
     int ierr;                  /* Return code from function calls. */
 
-    char* datasetname;
 
     /* Get the file information. */
     if ((ierr = pio_get_file(ncid, &file)))
         return pio_err(NULL, NULL, ierr, __FILE__, __LINE__);
     ios = file->iosystem;
+
+#ifdef _Z5
+    char* datasetname;
+    datasetname = (char*) malloc (1 + strlen(file->filename) + strlen(VARIABLEGROUP) + strlen(name));
+    strcpy(datasetname, file->filename);
+    strcat(datasetname, VARIABLEGROUP);
+    strcat(datasetname, name);
+#endif
 
     /* User must provide name. */
     if (!name || strlen(name) > NC_MAX_NAME)
@@ -2430,13 +2461,9 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
 #endif /* _NETCDF4 */
 
 #ifdef _Z5
-        if (file->iotype == PIO_IOTYPE_Z5 && !ios->io_rank)
+        if (file->iotype == PIO_IOTYPE_Z5 && !ios->io_rank && file->iotype)
         {
             //TODO: Z5Z5
-            datasetname = (char*) malloc (1 + strlen(file->filename) + strlen(VARIABLEGROUP) + strlen(name));
-            strcpy(datasetname, file->filename);
-            strcat(datasetname, VARIABLEGROUP);
-            strcat(datasetname, name);
             int* shape[ndims];
             int* chunk[ndims];
             int niostasks = ios->num_iotasks;
@@ -2497,28 +2524,16 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
     file->nvars++;
 
 #ifdef _Z5
-    if (ios->ioproc)
-    {
-        if (file->iotype == PIO_IOTYPE_Z5 && !ios->io_rank)
-        {
-            var_desc_t *vdesc;
-            if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
-                return pio_err(ios, file, ierr, __FILE__, __LINE__);
-            vdesc->varname = (char*) malloc (1 + strlen(datasetname));
-            strcpy(vdesc->varname, datasetname);
-            vdesc->ndims = ndims;
-            vdesc->xtypep = xtype;
-            vdesc->dimidsp = dimidsp;
-            vdesc->natts = 0;
-//            printf("vdesc->ndims is %d\n", vdesc->ndims);
-//            printf("vdesc->xtypep is %d\n", vdesc->xtypep);
-//            for (int i = 0; i < vdesc->ndims; i++)
-//            {
-//                printf("dimid %d is %d\n", i, vdesc->dimidsp[i]);
-//            }
-        }
-    }
-
+    var_desc_t *vdesc;
+    if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
+        return pio_err(ios, file, ierr, __FILE__, __LINE__);
+    vdesc->varname = (char*) malloc (1 + strlen(datasetname));
+    strcpy(vdesc->varname, datasetname);
+    vdesc->ndims = ndims;
+    vdesc->xtypep = xtype;
+    vdesc->dimidsp = dimidsp;
+    vdesc->natts = 0;
+    ierr = 0;
 #endif
 
     return PIO_NOERR;
