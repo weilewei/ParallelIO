@@ -2472,16 +2472,16 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                 if ((ierr = pio_get_dim(dimidsp[i], &dim)))
                     return ierr;
                 shape[i] = dim->dimval;
-                chunk[i] = shape[i];
+                chunk[i] = (int) shape[i] / niostasks;
             }
             if (ndims <= 2)
             {
                 switch (xtype)
                 {
-                    case NC_INT: // 4
-                        z5CreateInt64Dataset(datasetname, ndims, shape, shape, 1, 1);
-                    case NC_FLOAT: // 5
-                        z5CreateFloatDataset(datasetname, ndims, shape, shape, 1, 1);
+                    case NC_INT64: // 10
+                        z5CreateInt64Dataset(datasetname, ndims, shape, chunk, 1, 1);
+//                    case NC_FLOAT: // 5
+//                        z5CreateFloatDataset(datasetname, ndims, shape, chunk, 1, 1);
                 }
 
             }
@@ -2490,10 +2490,10 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                 chunk[0] = (int) (shape[0]) / niostasks;
                 switch (xtype)
                 {
-                    case NC_INT: // 4
+                    case NC_INT64: // 10
                         z5CreateInt64Dataset(datasetname, ndims, shape, chunk, 1, 1);
-                    case NC_FLOAT: // 5
-                        z5CreateFloatDataset(datasetname, ndims, shape, chunk, 1, 1);
+//                    case NC_FLOAT: // 5
+//                        z5CreateFloatDataset(datasetname, ndims, shape, chunk, 1, 1);
                 }
             }
             else {

@@ -1291,7 +1291,7 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
                 case NC_INT:
                     {
                         printf("vdesc->ndims%d\n", vdesc->ndims);
-                        z5WriteInt64Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)start, (size_t *)count);
+                        z5WriteInt64Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
 
                     }
             }

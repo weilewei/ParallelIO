@@ -60,7 +60,7 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     twod_dimids[1] = dimid1;
     MPI_Barrier(comm);
     /* Define a 1-D variable. */
-    if ((ret = PIOc_def_var(*ncidp, attname, NC_INT, 2, &twod_dimids, &varid)))
+    if ((ret = PIOc_def_var(*ncidp, attname, NC_INT64, 2, &twod_dimids, &varid)))
         return ret;
     MPI_Barrier(comm);
     /* Write an attribute. */
@@ -71,24 +71,24 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
 
     char attributename1[] = "long";
     double attributeval1 = 42.0;
-    if ((ret = PIOc_put_att_double(*ncidp, varid, attributename1, NC_DOUBLE, 1, &attributeval1)))
+    if ((ret = PIOc_put_att_double(*ncidp, varid, attributename1, NC_INT64, 1, &attributeval1)))
         return ret;
     // TODO: Z5Z5 how to get number of ranks
     printf("I am rank: %d\n", my_rank);
-    long long int start[] = {my_rank*100/4, 50};
-    long long int count[] = {25, 50};
-    int int_array[100][200];
+    long int count[] = {100/4, 50};
+    long int start[] = {my_rank*100/4, my_rank*200/4};
+    long int int64_array[100][200];
     for (int i = 0; i < 100; i++)
     {
         for (int j = 0; j < 200; j++)
         {
-            int_array[i][j]=42;
+            int64_array[i][j]=42;
         }
     }
 //    MPI_Comm test_comm;
     MPI_Barrier(comm);
 
-    if ((ret = PIOc_put_vara_int(*ncidp, varid, start, count, (int *)int_array)))
+    if ((ret = PIOc_put_vara_int(*ncidp, varid, start, count, (int *)int64_array)))
         ERR(ret);
     //PIOc_put_vars_tc
 
