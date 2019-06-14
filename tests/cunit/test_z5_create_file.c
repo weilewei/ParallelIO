@@ -121,6 +121,8 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
         return ret;
     MPI_Barrier(comm);
 
+
+
     /* Write an attribute. */
     char attributename0[] = "time";
     char attributeval0[] = "noon";
@@ -142,21 +144,64 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     if ((ret = PIOc_put_att_uint(*ncidp, varidint64, attributename3, NC_UINT, 1, &attributeval3)))
         return ret;
 
+
+
     long int count[] = {dimval0/TARGET_NTASKS, dimval1/TARGET_NTASKS};
     long int start[] = {my_rank*dimval0/TARGET_NTASKS, dimval1/TARGET_NTASKS};
     long int int64_array[dimval0][dimval1];
+    int8_t int8_t_array[dimval0][dimval1];
+    int16_t int16_t_array[dimval0][dimval1];
+    int32_t int32_t_array[dimval0][dimval1];
+    int64_t int64_t_array[dimval0][dimval1];
+    uint8_t   uint8_t_array[dimval0][dimval1];
+    uint16_t uint16_t_array[dimval0][dimval1];
+    uint32_t uint32_t_array[dimval0][dimval1];
+    uint64_t uint64_t_array[dimval0][dimval1];
+    double double_array[dimval0][dimval1];
+    float float_array[dimval0][dimval1];
     for (int i = 0; i < dimval0; i++)
     {
         for (int j = 0; j < dimval1; j++)
         {
-            int64_array[i][j]=42;
+            int64_array[i][j] = 42;
+            int32_t_array[i][j] = 42;
+            int16_t_array[i][j] = 42;
+            int8_t_array[i][j] = 42;
+            uint64_t_array[i][j] = 42;
+            uint32_t_array[i][j] = 42;
+            uint16_t_array[i][j] = 42;
+            uint8_t_array[i][j] = 42;
+            double_array[i][j] = 42.0;
+            double_array[i][j] = 42.0;
         }
     }
-//    MPI_Comm test_comm;
+
     MPI_Barrier(comm);
 
-    if ((ret = PIOc_put_vara_int(*ncidp, varidint64, start, count, (int *)int64_array)))
+    if ((ret = PIOc_put_vara_int(*ncidp, varidint32, start, count, (int32_t *)int32_t_array)))
         ERR(ret);
+
+    if ((ret = PIOc_put_vara_longlong(*ncidp, varidint64, start, count, (int64_t *)int64_array)))
+        ERR(ret);
+
+    if ((ret = PIOc_put_vara_short(*ncidp, varidint16, start, count, (int16_t *)int16_t_array)))
+        ERR(ret);
+
+    if ((ret = PIOc_put_vara_uint(*ncidp, variduint32, start, count, (uint32_t *)uint32_t_array)))
+        ERR(ret);
+
+    if ((ret = PIOc_put_vara_ulonglong(*ncidp, variduint64, start, count, (uint64_t *)uint64_t_array)))
+        ERR(ret);
+
+    if ((ret = PIOc_put_vara_ushort(*ncidp, variduint16, start, count, (uint16_t *)uint16_t_array)))
+        ERR(ret);
+
+    if ((ret = PIOc_put_vara_double(*ncidp, variddouble, start, count, (double *)double_array)))
+        ERR(ret);
+
+    if ((ret = PIOc_put_vara_float(*ncidp, varidfloat, start, count, (float *)float_array)))
+        ERR(ret);
+
     //PIOc_put_vars_tc
 
     /* End define mode. */

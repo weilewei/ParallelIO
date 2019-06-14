@@ -1290,10 +1290,37 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
             switch(xtype)
             {
                 case NC_INT:
-                    {
-                        z5WriteInt64Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
-
-                    }
+                    z5WriteInt32Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_BYTE:
+                    z5ReadInt8Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_UBYTE:
+                    z5ReadUInt8Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_SHORT:
+                    z5WriteInt16Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_USHORT:
+                    z5WriteUInt16Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_UINT:
+                    z5WriteUInt32Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_INT64:
+                    z5WriteInt64Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_UINT64:
+                    z5WriteUInt64Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_FLOAT:
+                    z5WriteFloat32Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_DOUBLE:
+                    z5WriteFloat64Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                default:
+                    return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
             }
 
             ierr = 0;
