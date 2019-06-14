@@ -217,17 +217,19 @@ PIOc_put_att_tc(int ncid, int varid, const char *name, nc_type atttype,
             switch(memtype)
             {
                 case NC_CHAR:
-                    {
-                        z5writeAttributesString(vdesc->varname, name, op);
-                        printf("char\n");
-                    }
+                    z5writeAttributesString(vdesc->varname, name, op);
                     break;
-                case NC_DOUBLE:
-                    {
-                        z5writeAttributesdouble(vdesc->varname, name, op);
-                        printf("double\n");
-                    }
+                case NC_INT:
+                    z5writeAttributesint(vdesc->varname, name, op);
                     break;
+                case NC_UINT:
+                    z5writeAttributesuint(vdesc->varname, name, op);
+                    break;
+                case NC_FLOAT:
+                    z5writeAttributesfloat(vdesc->varname, name, op);
+                    break;
+                default:
+                    return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
             }
             vdesc->natts++;
             ierr = 0;
@@ -1282,7 +1284,6 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
 #ifdef _Z5
         if (file->iotype == PIO_IOTYPE_Z5&& file->do_io)
         {
-            printf("Z5 is here\n");
             var_desc_t *vdesc;
             if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
                 return pio_err(ios, file, ierr, __FILE__, __LINE__);
@@ -1290,7 +1291,6 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
             {
                 case NC_INT:
                     {
-                        printf("vdesc->ndims%d\n", vdesc->ndims);
                         z5WriteInt64Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
 
                     }

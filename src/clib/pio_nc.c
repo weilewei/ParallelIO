@@ -2351,8 +2351,6 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
 #ifdef _Z5
         nunlimdims = 0;
 
-//        if ((ierr = pio_get_dim(dimidsp[0], &dim)))
-//            return ierr;
 #endif
 
         if (nunlimdims)
@@ -2478,22 +2476,78 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
             {
                 switch (xtype)
                 {
-                    case NC_INT64: // 10
+                    case NC_BYTE:
+                        z5CreateInt8Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_UBYTE:
+                        z5CreateUInt8Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_SHORT:
+                        z5CreateInt16Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_USHORT:
+                        z5CreateUInt16Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_INT:
+                        z5CreateInt32Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_UINT:
+                        z5CreateUInt32Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_INT64:
                         z5CreateInt64Dataset(datasetname, ndims, shape, chunk, 1, 1);
-//                    case NC_FLOAT: // 5
-//                        z5CreateFloatDataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_UINT64:
+                        z5CreateUInt64Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_FLOAT:
+                        z5CreateFloat32Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_DOUBLE:
+                        z5CreateFloat64Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    default:
+                        return pio_err(ios, file, NC_EBADTYPE, __FILE__, __LINE__);
                 }
 
             }
             else if (ndims > 2)
             {
-                chunk[0] = (int) (shape[0]) / niostasks;
+
                 switch (xtype)
                 {
-                    case NC_INT64: // 10
+                    case NC_BYTE:
+                        z5CreateInt8Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_UBYTE:
+                        z5CreateUInt8Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_SHORT:
+                        z5CreateInt16Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_USHORT:
+                        z5CreateUInt16Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_INT:
+                        z5CreateInt32Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_UINT:
+                        z5CreateUInt32Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_INT64:
                         z5CreateInt64Dataset(datasetname, ndims, shape, chunk, 1, 1);
-//                    case NC_FLOAT: // 5
-//                        z5CreateFloatDataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_UINT64:
+                        z5CreateUInt64Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_FLOAT:
+                        z5CreateFloat32Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    case NC_DOUBLE:
+                        z5CreateFloat64Dataset(datasetname, ndims, shape, chunk, 1, 1);
+                        break;
+                    default:
+                        return pio_err(ios, file, NC_EBADTYPE, __FILE__, __LINE__);
                 }
             }
             else {

@@ -18,7 +18,17 @@
 
 /* Used to define netcdf test file. */
 #define PIO_TF_MAX_STR_LEN 100
-#define ATTNAME "var0"
+#define Z5INT64 "INT64"
+#define Z5INT32 "INT32"
+#define Z5INT16 "INT16"
+#define Z5INT8 "INT8"
+#define Z5UINT64 "UINT64"
+#define Z5UINT32 "UINT32"
+#define Z5UINT16 "UINT16"
+#define Z5UINT8 "UINT8"
+#define Z5FLOAT "FLOAT"
+#define Z5DOUBLE "DOUBLE"
+#define ATTNAME "EMPTYPLACEHODER"
 //#define DIMNAME "filename_dim"
 //#define DIMNAME "pio_iosys_test_file0.z5/filename_dim"
 /* This creates a netCDF file in the specified format, with some
@@ -26,7 +36,10 @@
 int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
                 char *attname, char *dimname, int my_rank, int *ncidp)
 {
-    int ncid, varid, dimid0, dimid1;
+    int ncid, dimid0, dimid1;
+    int varidint64, varidint32, varidint16, varidint8;
+    int variduint64, variduint32, variduint16, variduint8;
+    int variddouble, varidfloat;
     int ret;
 
     /* Create the file. */
@@ -60,27 +73,81 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     twod_dimids[1] = dimid1;
     MPI_Barrier(comm);
     /* Define a 1-D variable. */
-    if ((ret = PIOc_def_var(*ncidp, attname, NC_INT64, 2, &twod_dimids, &varid)))
+    if ((ret = PIOc_def_var(*ncidp, Z5INT64, NC_INT64, 2, &twod_dimids, &varidint64)))
         return ret;
     MPI_Barrier(comm);
+
+    /* Define a 1-D variable. */
+    if ((ret = PIOc_def_var(*ncidp, Z5INT32, NC_INT, 2, &twod_dimids, &varidint32)))
+        return ret;
+    MPI_Barrier(comm);
+
+    /* Define a 1-D variable. */
+    if ((ret = PIOc_def_var(*ncidp, Z5INT16, NC_SHORT, 2, &twod_dimids, &varidint16)))
+        return ret;
+    MPI_Barrier(comm);
+
+    /* Define a 1-D variable. */
+    if ((ret = PIOc_def_var(*ncidp, Z5INT8, NC_BYTE, 2, &twod_dimids, &varidint8)))
+        return ret;
+    MPI_Barrier(comm);
+    /* Define a 1-D variable. */
+    if ((ret = PIOc_def_var(*ncidp, Z5UINT64, NC_UINT64, 2, &twod_dimids, &variduint64)))
+        return ret;
+    MPI_Barrier(comm);
+
+    /* Define a 1-D variable. */
+    if ((ret = PIOc_def_var(*ncidp, Z5UINT32, NC_UINT, 2, &twod_dimids, &variduint32)))
+        return ret;
+    MPI_Barrier(comm);
+
+    /* Define a 1-D variable. */
+    if ((ret = PIOc_def_var(*ncidp, Z5UINT16, NC_USHORT, 2, &twod_dimids, &variduint16)))
+        return ret;
+    MPI_Barrier(comm);
+
+    /* Define a 1-D variable. */
+    if ((ret = PIOc_def_var(*ncidp, Z5UINT8, NC_UBYTE, 2, &twod_dimids, &variduint8)))
+        return ret;
+    MPI_Barrier(comm);
+
+    /* Define a 1-D variable. */
+    if ((ret = PIOc_def_var(*ncidp, Z5DOUBLE, NC_DOUBLE, 2, &twod_dimids, &variddouble)))
+        return ret;
+    MPI_Barrier(comm);
+
+    /* Define a 1-D variable. */
+    if ((ret = PIOc_def_var(*ncidp, Z5FLOAT, NC_FLOAT, 2, &twod_dimids, &varidfloat)))
+        return ret;
+    MPI_Barrier(comm);
+
     /* Write an attribute. */
     char attributename0[] = "time";
     char attributeval0[] = "noon";
-    if ((ret = PIOc_put_att_text(*ncidp, varid, attributename0, strlen(filename), attributeval0)))
+    if ((ret = PIOc_put_att_text(*ncidp, varidint64, attributename0, strlen(filename), attributeval0)))
         return ret;
 
     char attributename1[] = "long";
-    double attributeval1 = 42.0;
-    if ((ret = PIOc_put_att_double(*ncidp, varid, attributename1, NC_INT64, 1, &attributeval1)))
+    float attributeval1 = 42.0;
+    if ((ret = PIOc_put_att_float(*ncidp, varidint64, attributename1, NC_FLOAT, 1, &attributeval1)))
         return ret;
-    // TODO: Z5Z5 how to get number of ranks
-    printf("I am rank: %d\n", my_rank);
-    long int count[] = {100/4, 50};
-    long int start[] = {my_rank*100/4, my_rank*200/4};
-    long int int64_array[100][200];
-    for (int i = 0; i < 100; i++)
+
+    char attributename2[] = "intatt";
+    int attributeval2 = 23;
+    if ((ret = PIOc_put_att_int(*ncidp, varidint64, attributename2, NC_INT, 1, &attributeval2)))
+        return ret;
+
+    char attributename3[] = "uintatt";
+    unsigned int attributeval3 = 23;
+    if ((ret = PIOc_put_att_uint(*ncidp, varidint64, attributename3, NC_UINT, 1, &attributeval3)))
+        return ret;
+
+    long int count[] = {dimval0/TARGET_NTASKS, dimval1/TARGET_NTASKS};
+    long int start[] = {my_rank*dimval0/TARGET_NTASKS, dimval1/TARGET_NTASKS};
+    long int int64_array[dimval0][dimval1];
+    for (int i = 0; i < dimval0; i++)
     {
-        for (int j = 0; j < 200; j++)
+        for (int j = 0; j < dimval1; j++)
         {
             int64_array[i][j]=42;
         }
@@ -88,7 +155,7 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
 //    MPI_Comm test_comm;
     MPI_Barrier(comm);
 
-    if ((ret = PIOc_put_vara_int(*ncidp, varid, start, count, (int *)int64_array)))
+    if ((ret = PIOc_put_vara_int(*ncidp, varidint64, start, count, (int *)int64_array)))
         ERR(ret);
     //PIOc_put_vars_tc
 
