@@ -9,7 +9,7 @@
 #include <config.h>
 #include <pio.h>
 #include <pio_tests.h>
-
+#include <assert.h>
 /* The number of tasks this test should run on. */
 #define TARGET_NTASKS 4
 
@@ -146,8 +146,10 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
 
 
 
-    long int count[] = {dimval0/TARGET_NTASKS, dimval1/TARGET_NTASKS};
-    long int start[] = {my_rank*dimval0/TARGET_NTASKS, dimval1/TARGET_NTASKS};
+//    long int count[] = {dimval0/TARGET_NTASKS, dimval1/TARGET_NTASKS};
+//    long int start[] = {my_rank*dimval0/TARGET_NTASKS, dimval1/TARGET_NTASKS};
+    long int count[] = {dimval0/TARGET_NTASKS, dimval1};
+    long int start[] = {my_rank*dimval0/TARGET_NTASKS, 0};
     long int int64_array[dimval0][dimval1];
     int8_t int8_t_array[dimval0][dimval1];
     int16_t int16_t_array[dimval0][dimval1];
@@ -202,7 +204,22 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     if ((ret = PIOc_put_vara_float(*ncidp, varidfloat, start, count, (float *)float_array)))
         ERR(ret);
 
-    //PIOc_put_vars_tc
+    MPI_Barrier(comm);
+    double double_array_in[dimval0][dimval1];
+    MPI_Barrier(comm);
+    if ((ret = PIOc_get_vara_double(*ncidp, variddouble, start, count, (double *)double_array_in)))
+        ERR(ret);
+    MPI_Barrier(comm);
+    for (int x = 0; x < dimval0/TARGET_NTASKS; x++)
+    {
+        for (int y = 0; y < dimval1; y++)
+        {
+//            printf("%f\t", double_array_in[x][y]);
+            assert(double_array_in[x][y] == double_array[x][y]);
+        }
+//        printf("\n");
+    }
+    printf("asserted!\n");
 
     /* End define mode. */
 //    if ((ret = PIOc_enddef(ncid)))

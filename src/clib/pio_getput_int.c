@@ -710,7 +710,7 @@ PIOc_get_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
             LOG((2, "fake_stride[%d]  %d", d, fake_stride[d]));
         }
 
-        if (file->iotype != PIO_IOTYPE_PNETCDF && file->do_io)
+        if (file->iotype != PIO_IOTYPE_PNETCDF && file->iotype != PIO_IOTYPE_Z5 && file->do_io)
         {
             switch(xtype)
             {
@@ -773,7 +773,22 @@ PIOc_get_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
                 return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
             }
         }
-
+#ifdef _Z5
+        if (file->iotype == PIO_IOTYPE_Z5 && file->do_io)
+        {
+            var_desc_t *vdesc;
+            if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
+                return pio_err(ios, file, ierr, __FILE__, __LINE__);
+            switch(xtype)
+            {
+                case NC_DOUBLE:
+                    z5ReadFloat64Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    printf("read successfully\n");
+                    break;
+            }
+        }
+        ierr = 0;
+#endif
     }
 
     LOG((2, "howdy ndims %d", ndims));

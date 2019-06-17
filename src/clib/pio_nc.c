@@ -2470,9 +2470,11 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                 if ((ierr = pio_get_dim(dimidsp[i], &dim)))
                     return ierr;
                 shape[i] = dim->dimval;
-                chunk[i] = (int) shape[i] / niostasks;
+                chunk[i] = shape[i];
+//                chunk[i] = (int) shape[i] / niostasks;
             }
-            if (ndims <= 2)
+            chunk[0] = (int) shape[0] / niostasks;
+            if (ndims <= 2 && ndims > 0)
             {
                 switch (xtype)
                 {
@@ -2551,6 +2553,7 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                 }
             }
             else {
+                // TODO: Z5Z5
                 printf("ooops\n");
             }
             varid = pio_next_z5_varid++;
