@@ -10,6 +10,8 @@
 #include <pio.h>
 #include <pio_tests.h>
 #include <assert.h>
+#include <stdio.h>
+#include <stdlib.h>
 /* The number of tasks this test should run on. */
 #define TARGET_NTASKS 4
 
@@ -144,37 +146,34 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     if ((ret = PIOc_put_att_uint(*ncidp, varidint64, attributename3, NC_UINT, 1, &attributeval3)))
         return ret;
 
-
-
-//    long int count[] = {dimval0/TARGET_NTASKS, dimval1/TARGET_NTASKS};
-//    long int start[] = {my_rank*dimval0/TARGET_NTASKS, dimval1/TARGET_NTASKS};
     long int count[] = {dimval0/TARGET_NTASKS, dimval1};
     long int start[] = {my_rank*dimval0/TARGET_NTASKS, 0};
-    long int int64_array[dimval0][dimval1];
-    int8_t int8_t_array[dimval0][dimval1];
-    int16_t int16_t_array[dimval0][dimval1];
-    int32_t int32_t_array[dimval0][dimval1];
-    int64_t int64_t_array[dimval0][dimval1];
-    uint8_t   uint8_t_array[dimval0][dimval1];
-    uint16_t uint16_t_array[dimval0][dimval1];
-    uint32_t uint32_t_array[dimval0][dimval1];
-    uint64_t uint64_t_array[dimval0][dimval1];
-    double double_array[dimval0][dimval1];
-    float float_array[dimval0][dimval1];
-    for (int i = 0; i < dimval0; i++)
+
+    long int int64_array[dimval0/TARGET_NTASKS][dimval1];
+    int8_t int8_t_array[dimval0/TARGET_NTASKS][dimval1];
+    int16_t int16_t_array[dimval0/TARGET_NTASKS][dimval1];
+    int32_t int32_t_array[dimval0/TARGET_NTASKS][dimval1];
+    int64_t int64_t_array[dimval0/TARGET_NTASKS][dimval1];
+    uint8_t   uint8_t_array[dimval0/TARGET_NTASKS][dimval1];
+    uint16_t uint16_t_array[dimval0/TARGET_NTASKS][dimval1];
+    uint32_t uint32_t_array[dimval0/TARGET_NTASKS][dimval1];
+    uint64_t uint64_t_array[dimval0/TARGET_NTASKS][dimval1];
+    double double_array[dimval0/TARGET_NTASKS][dimval1];
+    float float_array[dimval0/TARGET_NTASKS][dimval1];
+    for (int i = 0; i < dimval0/TARGET_NTASKS; i++)
     {
         for (int j = 0; j < dimval1; j++)
         {
-            int64_array[i][j] = 42;
-            int32_t_array[i][j] = 42;
-            int16_t_array[i][j] = 42;
-            int8_t_array[i][j] = 42;
-            uint64_t_array[i][j] = 42;
-            uint32_t_array[i][j] = 42;
-            uint16_t_array[i][j] = 42;
-            uint8_t_array[i][j] = 42;
-            double_array[i][j] = 42.0;
-            double_array[i][j] = 42.0;
+            int64_array[i][j] = rand()%1000+1;
+            int32_t_array[i][j] = rand()%1000+1;
+            int16_t_array[i][j] = rand()%1000+1;
+//            int8_t_array[i][j] = rand()%1000+1;
+            uint64_t_array[i][j] = rand()%1000+1;
+            uint32_t_array[i][j] = rand()%1000+1;
+            uint16_t_array[i][j] = rand()%1000+1;
+//            uint8_t_array[i][j] = rand()%1000+1;
+            double_array[i][j] = rand()%1000+1;
+            double_array[i][j] = rand()%1000+1;
         }
     }
 
@@ -205,21 +204,60 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
         ERR(ret);
 
     MPI_Barrier(comm);
-    double double_array_in[dimval0][dimval1];
+    long int int64_array_in[dimval0/TARGET_NTASKS][dimval1];
+//    int8_t int8_t_array_in[dimval0/TARGET_NTASKS][dimval1];
+    int16_t int16_t_array_in[dimval0/TARGET_NTASKS][dimval1];
+    int32_t int32_t_array_in[dimval0/TARGET_NTASKS][dimval1];
+    int64_t int64_t_array_in[dimval0/TARGET_NTASKS][dimval1];
+//    uint8_t   uint8_t_array_in[dimval0/TARGET_NTASKS][dimval1];
+    uint16_t uint16_t_array_in[dimval0/TARGET_NTASKS][dimval1];
+    uint32_t uint32_t_array_in[dimval0/TARGET_NTASKS][dimval1];
+    uint64_t uint64_t_array_in[dimval0/TARGET_NTASKS][dimval1];
+    float float_array_in[dimval0/TARGET_NTASKS][dimval1];
+    double double_array_in[dimval0/TARGET_NTASKS][dimval1];
     MPI_Barrier(comm);
+    if ((ret = PIOc_get_vara_int(*ncidp, varidint32, start, count, (int32_t *)int32_t_array_in)))
+        ERR(ret);
+
+    if ((ret = PIOc_get_vara_longlong(*ncidp, varidint64, start, count, (int64_t *)int64_array_in)))
+        ERR(ret);
+
+    if ((ret = PIOc_get_vara_short(*ncidp, varidint16, start, count, (int16_t *)int16_t_array_in)))
+        ERR(ret);
+
+    if ((ret = PIOc_get_vara_uint(*ncidp, variduint32, start, count, (uint32_t *)uint32_t_array_in)))
+        ERR(ret);
+
+    if ((ret = PIOc_get_vara_ulonglong(*ncidp, variduint64, start, count, (uint64_t *)uint64_t_array_in)))
+        ERR(ret);
+
+    if ((ret = PIOc_get_vara_ushort(*ncidp, variduint16, start, count, (uint16_t *)uint16_t_array_in)))
+        ERR(ret);
+
     if ((ret = PIOc_get_vara_double(*ncidp, variddouble, start, count, (double *)double_array_in)))
         ERR(ret);
+
+    if ((ret = PIOc_get_vara_float(*ncidp, varidfloat, start, count, (float *)float_array_in)))
+        ERR(ret);
     MPI_Barrier(comm);
-    for (int x = 0; x < dimval0/TARGET_NTASKS; x++)
+
+    for (int x = 0; x < count[0]; x++)
     {
-        for (int y = 0; y < dimval1; y++)
+        for (int y = 0; y < count[1]; y++)
         {
-//            printf("%f\t", double_array_in[x][y]);
+            assert(int64_array_in[x][y] == int64_array[x][y]);
+//            assert(int8_t_array_in[x][y] == int8_t_array[x][y]);
+            assert(int16_t_array_in[x][y] == int16_t_array[x][y]);
+            assert(int32_t_array_in[x][y] == int32_t_array[x][y]);
+            assert(int64_t_array_in[x][y] == int64_t_array[x][y]);
+//            assert(uint8_t_array_in[x][y] == uint8_t_array[x][y]);
+            assert(uint16_t_array_in[x][y] == uint16_t_array[x][y]);
+            assert(uint32_t_array_in[x][y] == uint32_t_array[x][y]);
+            assert(uint64_t_array_in[x][y] == uint64_t_array[x][y]);
+            assert(float_array_in[x][y] == float_array[x][y]);
             assert(double_array_in[x][y] == double_array[x][y]);
         }
-//        printf("\n");
     }
-    printf("asserted!\n");
 
     /* End define mode. */
 //    if ((ret = PIOc_enddef(ncid)))

@@ -781,10 +781,38 @@ PIOc_get_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
                 return pio_err(ios, file, ierr, __FILE__, __LINE__);
             switch(xtype)
             {
+                case NC_INT:
+                    z5ReadInt32Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_BYTE:
+                    z5ReadInt8Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_UBYTE:
+                    z5ReadUInt8Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_SHORT:
+                    z5ReadInt16Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_USHORT:
+                    z5ReadUInt16Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_UINT:
+                    z5ReadUInt32Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_INT64:
+                    z5ReadInt64Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_UINT64:
+                    z5ReadUInt64Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
+                case NC_FLOAT:
+                    z5ReadFloat32Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    break;
                 case NC_DOUBLE:
                     z5ReadFloat64Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
-                    printf("read successfully\n");
                     break;
+                default:
+                    return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
             }
         }
         ierr = 0;
@@ -1297,7 +1325,7 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
         }
 
 #ifdef _Z5
-        if (file->iotype == PIO_IOTYPE_Z5&& file->do_io)
+        if (file->iotype == PIO_IOTYPE_Z5 && file->do_io)
         {
             var_desc_t *vdesc;
             if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
@@ -1308,10 +1336,10 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
                     z5WriteInt32Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
                     break;
                 case NC_BYTE:
-                    z5ReadInt8Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    z5WriteInt8Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
                     break;
                 case NC_UBYTE:
-                    z5ReadUInt8Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
+                    z5WriteUInt8Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
                     break;
                 case NC_SHORT:
                     z5WriteInt16Subarray(vdesc->varname, buf, vdesc->ndims, (size_t *)count, (size_t *)start);
