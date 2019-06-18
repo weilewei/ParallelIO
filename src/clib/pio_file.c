@@ -281,6 +281,7 @@ int PIOc_closefile(int ncid)
         // TODO: Z5Z5 do not need to close file
         case PIO_IOTYPE_Z5:
             ierr = 0;
+            break;
 #endif
         default:
             return pio_err(ios, file, PIO_EBADIOTYPE, __FILE__, __LINE__);

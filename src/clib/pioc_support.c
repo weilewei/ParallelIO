@@ -2639,7 +2639,7 @@ pioc_change_def(int ncid, int is_enddef)
                 ierr = ncmpi_redef(file->fh);
         }
 #endif /* _PNETCDF */
-        if (file->iotype != PIO_IOTYPE_PNETCDF && file->do_io)
+        if (file->iotype != PIO_IOTYPE_PNETCDF && file->iotype != PIO_IOTYPE_Z5 && file->do_io)
         {
             if (is_enddef)
             {
@@ -2649,6 +2649,17 @@ pioc_change_def(int ncid, int is_enddef)
             else
                 ierr = nc_redef(file->fh);
         }
+#ifdef _Z5
+        if (file->iotype == PIO_IOTYPE_Z5 && file->do_io)
+        {
+            if (is_enddef)
+            {
+                ierr = 0;
+            }
+            else
+                ierr = 0;
+        }
+#endif
     }
 
     /* Broadcast and check the return code. */

@@ -167,17 +167,23 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
             int64_array[i][j] = rand()%1000+1;
             int32_t_array[i][j] = rand()%1000+1;
             int16_t_array[i][j] = rand()%1000+1;
-//            int8_t_array[i][j] = rand()%1000+1;
+            int8_t_array[i][j] = rand()%1000+1;
             uint64_t_array[i][j] = rand()%1000+1;
             uint32_t_array[i][j] = rand()%1000+1;
             uint16_t_array[i][j] = rand()%1000+1;
-//            uint8_t_array[i][j] = rand()%1000+1;
+            uint8_t_array[i][j] = rand()%1000+1;
             double_array[i][j] = rand()%1000+1;
             double_array[i][j] = rand()%1000+1;
         }
     }
 
     MPI_Barrier(comm);
+
+    if ((ret = PIOc_put_vara_schar(*ncidp, varidint8, start, count, (int8_t *)int8_t_array)))
+        ERR(ret);
+
+    if ((ret = PIOc_put_vara_uchar(*ncidp, variduint8, start, count, (uint8_t *)uint8_t_array)))
+        ERR(ret);
 
     if ((ret = PIOc_put_vara_int(*ncidp, varidint32, start, count, (int32_t *)int32_t_array)))
         ERR(ret);
@@ -205,17 +211,24 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
 
     MPI_Barrier(comm);
     long int int64_array_in[dimval0/TARGET_NTASKS][dimval1];
-//    int8_t int8_t_array_in[dimval0/TARGET_NTASKS][dimval1];
+    int8_t int8_t_array_in[dimval0/TARGET_NTASKS][dimval1];
     int16_t int16_t_array_in[dimval0/TARGET_NTASKS][dimval1];
     int32_t int32_t_array_in[dimval0/TARGET_NTASKS][dimval1];
     int64_t int64_t_array_in[dimval0/TARGET_NTASKS][dimval1];
-//    uint8_t   uint8_t_array_in[dimval0/TARGET_NTASKS][dimval1];
+    uint8_t   uint8_t_array_in[dimval0/TARGET_NTASKS][dimval1];
     uint16_t uint16_t_array_in[dimval0/TARGET_NTASKS][dimval1];
     uint32_t uint32_t_array_in[dimval0/TARGET_NTASKS][dimval1];
     uint64_t uint64_t_array_in[dimval0/TARGET_NTASKS][dimval1];
     float float_array_in[dimval0/TARGET_NTASKS][dimval1];
     double double_array_in[dimval0/TARGET_NTASKS][dimval1];
     MPI_Barrier(comm);
+
+    if ((ret = PIOc_get_vara_schar(*ncidp, varidint8, start, count, (int8_t *)int8_t_array_in)))
+        ERR(ret);
+
+    if ((ret = PIOc_get_vara_uchar(*ncidp, variduint8, start, count, (uint8_t *)uint8_t_array_in)))
+        ERR(ret);
+
     if ((ret = PIOc_get_vara_int(*ncidp, varidint32, start, count, (int32_t *)int32_t_array_in)))
         ERR(ret);
 
@@ -246,11 +259,11 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
         for (int y = 0; y < count[1]; y++)
         {
             assert(int64_array_in[x][y] == int64_array[x][y]);
-//            assert(int8_t_array_in[x][y] == int8_t_array[x][y]);
+            assert(int8_t_array_in[x][y] == int8_t_array[x][y]);
             assert(int16_t_array_in[x][y] == int16_t_array[x][y]);
             assert(int32_t_array_in[x][y] == int32_t_array[x][y]);
             assert(int64_t_array_in[x][y] == int64_t_array[x][y]);
-//            assert(uint8_t_array_in[x][y] == uint8_t_array[x][y]);
+            assert(uint8_t_array_in[x][y] == uint8_t_array[x][y]);
             assert(uint16_t_array_in[x][y] == uint16_t_array[x][y]);
             assert(uint32_t_array_in[x][y] == uint32_t_array[x][y]);
             assert(uint64_t_array_in[x][y] == uint64_t_array[x][y]);
@@ -260,12 +273,11 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     }
 
     /* End define mode. */
-//    if ((ret = PIOc_enddef(ncid)))
-//        return ret;
-//    printf("end of PIOc_enddef ret:%d\n", ret);
+    if ((ret = PIOc_enddef(*ncidp)))
+        return ret;
     /* Close the file. */
-//    if ((ret = PIOc_closefile(ncid)))
-//        return ret;
+    if ((ret = PIOc_closefile(*ncidp)))
+        return ret;
     return PIO_NOERR;
 }
 
