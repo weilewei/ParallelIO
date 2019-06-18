@@ -150,7 +150,7 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
     long int start[] = {my_rank*dimval0/TARGET_NTASKS, 0};
 
     long int int64_array[dimval0/TARGET_NTASKS][dimval1];
-    int8_t int8_t_array[dimval0/TARGET_NTASKS][dimval1];
+    char int8_t_array[dimval0/TARGET_NTASKS][dimval1];
     int16_t int16_t_array[dimval0/TARGET_NTASKS][dimval1];
     int32_t int32_t_array[dimval0/TARGET_NTASKS][dimval1];
     int64_t int64_t_array[dimval0/TARGET_NTASKS][dimval1];
@@ -174,6 +174,7 @@ int create_file(MPI_Comm comm, int iosysid, int format, char *filename,
             uint8_t_array[i][j] = rand()%1000+1;
             double_array[i][j] = rand()%1000+1;
             double_array[i][j] = rand()%1000+1;
+            float_array[i][j] = rand()%1000+1;
         }
     }
 
@@ -380,14 +381,22 @@ int main(int argc, char **argv)
                 char fname1[] = "pio_iosys_test_file1";
                 char fname2[] = "pio_iosys_test_file2";
                 char* group_tmp = "/group";
-                char* dimname = "dim1";
+                char* dimname0 = "dim0";
+                char* dimname1 = "dim1";
+                char* dimname2 = "dim2";
 //                char* dimname = (char*) malloc (1 + strlen(fname0) + strlen(group_tmp) + strlen(dim_tmp));
 //                strcpy(dimname, fname0);
 //                strcat(dimname, group_tmp);
 //                strcat(dimname, dim_tmp);
 //                printf("dimname is %s\n", dimname);
                 if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname0, ATTNAME,
-                                       dimname, my_rank, &file0id)))
+                                       dimname0, my_rank, &file0id)))
+                    ERR(ret);
+                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname1, ATTNAME,
+                                       dimname1, my_rank, &file1id)))
+                    ERR(ret);
+                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname2, ATTNAME,
+                                       dimname2, my_rank, &file2id)))
                     ERR(ret);
 //                printf("1st ncid=%d\n", file0id);
 //                if ((ret = create_file(test_comm, iosysid_world, iotypes[i], fname1, ATTNAME,
