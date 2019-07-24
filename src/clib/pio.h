@@ -128,6 +128,7 @@ typedef struct dim_desc_t
 } dim_desc_t;
 
 #define VARIABLEGROUP "/variables/"
+#define Z5FILEEXTENSION ".z5"
 /**
  * Variable description structure.
  */

@@ -143,6 +143,7 @@ include_directories(
         "${Z5_DIR}/z5"
         ${MARRAY_INCLUDE_DIR}
         ${ZLIB_INCLUDE_DIRS})
+SET(COMPRESSION_LIBRARIES "${COMPRESSION_LIBRARIES};${ZLIB_LIBRARIES}")
 set(SRC_FILES ${Z5_DIR}/z5/file.hxx ${Z5_DIR}/z5/metadata.hxx)
 add_library(z5wrapper z5wrapper.h z5wrapper.cc ${SRC_FILES})
 

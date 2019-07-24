@@ -1812,6 +1812,10 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
     file->buffer = NULL;
     file->writable = 1;
 #ifdef _Z5
+    char* filenametmp = (char*) malloc (1 + strlen(filename) + strlen(Z5FILEEXTENSION) );
+    strcpy(filenametmp, filename);
+    strcat(filenametmp, Z5FILEEXTENSION);
+    filename = filenametmp;
     strcpy(file->filename, filename);
 #endif
     /* Set to true if this task should participate in IO (only true for
