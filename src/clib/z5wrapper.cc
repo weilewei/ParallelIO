@@ -73,11 +73,16 @@ namespace z5 {
 
     void z5CreateFloat64Dataset(char *path, unsigned int ndim, size_t *shape, size_t *count, int cuseZlib, int level) {
         std::string path_s(path);
-        std::vector<std::string> dtype({"float64"});
-        std::vector<size_t> shape_v(shape, shape + ndim);
-        std::vector<size_t> count_v(count, count + ndim);
         bool asZarr = true;
-
+        std::vector<size_t> shape_v,count_v;
+        int tmp;
+        tmp = ndim == 0 ? 1 : ndim;
+           
+        for (int i = 0; i < tmp; i++){
+            shape_v.push_back(shape[i]);
+            count_v.push_back(count[i]);
+        }
+         
         DatasetMetadata floatMeta(types::Datatype::float64,shape_v,count_v,asZarr);
         if (cuseZlib) {
             floatMeta.compressor = types::zlib;
@@ -93,12 +98,26 @@ namespace z5 {
     void z5WriteFloat64Subarray(char *path, double *array, unsigned int ndim, size_t *count, size_t *start) {
         std::string path_s(path);
         auto ds =openDataset(path_s);
+        using vec_type = std::vector<int32_t>;
+        std::vector<size_t> start_v;
+        using count_type = std::vector<vec_type::size_type>;
+        count_type s;
+        int tmp;
+        tmp = ndim == 0 ? 1 : ndim;
         size_t size = 1;
-        std::vector<std::size_t> count_v(count,count + ndim);
-        for (std::vector<size_t>::const_iterator i = count_v.begin(); i != count_v.end(); ++i)
-            size=size*(*i);
-        xt::xarray<double> adp_array=xt::adapt(array,size,xt::no_ownership(),count_v);
-        std::vector<size_t> start_v(start,start + ndim);
+        for (int i = 0; i < tmp; i++){
+            if (ndim == 0){
+                start_v.push_back(0);
+		s.push_back(1);  //set count to 1 instead of default 96
+            }
+            else{
+            //std::cout<<"z5 double "<<count[i]<<std::endl;
+            start_v.push_back(start[i]);
+            s.push_back(count[i]);
+            size = size*count[i];
+            }
+        }
+        auto adp_array=xt::adapt(array,size,xt::no_ownership(),s);
         multiarray::writeSubarray<double>(ds,adp_array,start_v.begin());
     }
 
@@ -215,11 +234,16 @@ namespace z5 {
 
     void z5CreateInt32Dataset(char *path, unsigned int ndim, size_t *shape, size_t *count, int cuseZlib, int level) {
         std::string path_s(path);
-
-        std::vector<size_t> shape_v(shape, shape + ndim);
-        std::vector<size_t> count_v(count, count + ndim);
         bool asZarr = true;
-
+        std::vector<size_t> shape_v,count_v;
+        int tmp;
+        tmp = ndim == 0 ? 1 : ndim;
+           
+        for (int i = 0; i < tmp; i++){
+            shape_v.push_back(shape[i]);
+            count_v.push_back(count[i]);
+        }
+         
         DatasetMetadata int32Meta(types::Datatype::int32,shape_v,count_v,asZarr);
         if (cuseZlib) {
             int32Meta.compressor = types::zlib;
@@ -235,13 +259,25 @@ namespace z5 {
         std::string path_s(path);
         auto ds =openDataset(path_s);
         using vec_type = std::vector<int32_t>;
-        size_t size = 1;
-        std::vector<std::size_t> count_v(count,count + ndim);
-        for (std::vector<size_t>::const_iterator i = count_v.begin(); i != count_v.end(); ++i)
-            size=size*(*i);
+        std::vector<size_t> start_v;
         using count_type = std::vector<vec_type::size_type>;
-        count_type s(count,count+ndim);
-        std::vector<size_t> start_v(start,start + ndim);
+        count_type s;
+        int tmp;
+        tmp = ndim == 0 ? 1 : ndim;
+        size_t size = 1;
+        
+
+        for (int i = 0; i < tmp; i++){
+            if (ndim == 0){
+                start_v.push_back(0);
+		s.push_back(1);  //set count to 1 instead of default 96
+            }
+            else{
+            start_v.push_back(start[i]);
+            s.push_back(count[i]);
+            size = size*count[i];
+            }
+        }
         auto adp_array=xt::adapt(array,size,xt::no_ownership(),s);
         multiarray::writeSubarray<int32_t>(ds,adp_array,start_v.begin());
     }

@@ -307,6 +307,9 @@ PIOc_write_darray_multi(int ncid, const int *varids, int ioid, int nvars,
     switch (file->iotype)
     {
     case PIO_IOTYPE_NETCDF4P:
+#ifdef _Z5
+    case PIO_IOTYPE_Z5:
+#endif 
     case PIO_IOTYPE_PNETCDF:
         if ((ierr = write_darray_multi_par(file, nvars, fndims, varids, iodesc,
                                            DARRAY_DATA, frame)))
@@ -563,7 +566,7 @@ find_var_fillvalue(file_desc_t *file, int varid, var_desc_t *vdesc)
 
     /* Get the fill value one would expect, if NOFILL were not turned
      * on. */
-    if (!vdesc->use_fill)
+    if (vdesc->use_fill) /*changed if use fill, then get fill value*/
         if ((ierr = pio_inq_var_fill_expected(file->pio_ncid, varid, pio_type, type_size,
                                               vdesc->fillvalue)))
             return pio_err(ios, NULL, ierr, __FILE__, __LINE__);
@@ -899,8 +902,13 @@ PIOc_read_darray(int ncid, int varid, int ioid, PIO_Offset arraylen,
             return pio_err(ios, file, PIO_ENOMEM, __FILE__, __LINE__);
 
     /* Call the correct darray read function based on iotype. */
+    //fprintf(stderr,"iotype----====%d\n",file->iotype);
     switch (file->iotype)
     {
+#ifdef _Z5
+    case PIO_IOTYPE_Z5:
+//      file->iotype=2;  
+#endif
     case PIO_IOTYPE_NETCDF:
     case PIO_IOTYPE_NETCDF4C:
         if ((ierr = pio_read_darray_nc_serial(file, iodesc, varid, iobuf)))
@@ -914,7 +922,9 @@ PIOc_read_darray(int ncid, int varid, int ioid, PIO_Offset arraylen,
     default:
         return pio_err(NULL, NULL, PIO_EBADIOTYPE, __FILE__, __LINE__);
     }
-
+//#ifdef _Z5
+//      file->iotype = 5;
+//#endif
     if (iodesc->needssort)
     {
         if (!(tmparray = malloc(iodesc->piotype_size*iodesc->maplen)))

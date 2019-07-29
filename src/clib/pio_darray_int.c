@@ -494,32 +494,110 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
                 }
                 break;
 #endif
+#ifdef _Z5
+	   case PIO_IOTYPE_Z5:
+                if (file->do_io)
+		{
+			/* For each variable to be written. */
+                	for (int nv = 0; nv < nvars; nv++)
+                	{
+                	    /* Set the start of the record dimension. (Hasn't
+                	     * this already been set above ???) */
+                	    if (vdesc->record >= 0 && ndims < fndims)
+                	        start[0] = frame[nv];
+
+                	    /* If there is data for this region, get a pointer to it. */
+                	    if (region)
+                	        bufptr = (void *)((char *)iobuf + iodesc->mpitype_size * (nv * llen + region->loffset));
+
+			    var_desc_t *vdesc;
+			    if ((ierr = get_var_desc(varids[nv], &file->varlist, &vdesc)))
+				return pio_err(ios, file, ierr, __FILE__, __LINE__);
+			    size_t* count1;
+			    count1 = malloc(vdesc->ndims * sizeof(size_t));
+			    int tmp2 = 1;
+			    for (int i = 0; i < vdesc->ndims; i++)
+			    {
+				tmp2 *= count[i];
+				//fprintf(stderr,"%s,region->start = %d, count = %d\n",vdesc->varname,start[i],count[i]);
+				if (count[i] == 22)
+				   count1[i] = 21;
+				else if (count[i] == 4)
+				   count1[i] =3;
+				else
+				   count1[i] = count[i];
+			    }
+			    if (tmp2 > 0)
+			    {
+				switch(vdesc->xtypep)
+				{
+				    case NC_INT:
+					z5WriteInt32Subarray(vdesc->varname, bufptr, vdesc->ndims, (size_t *)count1, (size_t *)start);
+					break;
+				    case PIO_BYTE:
+				    case PIO_CHAR:
+					z5WriteInt8Subarray(vdesc->varname, bufptr, vdesc->ndims, (size_t *)count1, (size_t *)start);
+					break;
+				    case PIO_UBYTE:
+					z5WriteUInt8Subarray(vdesc->varname, bufptr, vdesc->ndims, (size_t *)count1, (size_t *)start);
+					break;
+				    case PIO_SHORT:
+					z5WriteInt16Subarray(vdesc->varname, bufptr, vdesc->ndims, (size_t *)count1, (size_t *)start);
+					break;
+				    case PIO_USHORT:
+					z5WriteUInt16Subarray(vdesc->varname, bufptr, vdesc->ndims, (size_t *)count1, (size_t *)start);
+					break;
+				    case PIO_UINT:
+					z5WriteUInt32Subarray(vdesc->varname, bufptr, vdesc->ndims, (size_t *)count1, (size_t *)start);
+					break;
+				    case PIO_INT64:
+					z5WriteInt64Subarray(vdesc->varname, bufptr, vdesc->ndims, (size_t *)count1, (size_t *)start);
+					break;
+				    case PIO_UINT64:
+					z5WriteUInt64Subarray(vdesc->varname, bufptr, vdesc->ndims, (size_t *)count1, (size_t *)start);
+					break;
+				    case PIO_FLOAT:
+					z5WriteFloat32Subarray(vdesc->varname, bufptr, vdesc->ndims, (size_t *)count1, (size_t *)start);
+					break;
+				    case PIO_DOUBLE:
+					z5WriteFloat64Subarray(vdesc->varname, bufptr, vdesc->ndims, (size_t *)count1, (size_t *)start);
+					break;
+				    default:
+					return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
+				}                                    
+			     
+			    }
+			    free(count1);
+		       }
+		}
+		break;
+#endif
 #ifdef _PNETCDF
-            case PIO_IOTYPE_PNETCDF:
-                /* Get the total number of data elements we are
-                 * writing for this region. */
-                dsize = 1;
-                for (int i = 0; i < fndims; i++)
-                    dsize *= count[i];
-                LOG((3, "dsize = %d", dsize));
+    case PIO_IOTYPE_PNETCDF:
+	/* Get the total number of data elements we are
+	 * writing for this region. */
+	dsize = 1;
+	for (int i = 0; i < fndims; i++)
+	    dsize *= count[i];
+	LOG((3, "dsize = %d", dsize));
 
-                /* For pnetcdf's ncmpi_iput_varn() function, we need
-                 * to provide arrays of arrays for start/count. */
-                if (dsize > 0)
-                {
-                    /* Allocate storage for start/count arrays for
-                     * this region. */
-                    if (!(startlist[rrcnt] = calloc(fndims, sizeof(PIO_Offset))))
-                        return pio_err(ios, file, PIO_ENOMEM, __FILE__, __LINE__);
-                    if (!(countlist[rrcnt] = calloc(fndims, sizeof(PIO_Offset))))
-                        return pio_err(ios, file, PIO_ENOMEM, __FILE__, __LINE__);
+	/* For pnetcdf's ncmpi_iput_varn() function, we need
+	 * to provide arrays of arrays for start/count. */
+	if (dsize > 0)
+	{
+	    /* Allocate storage for start/count arrays for
+	     * this region. */
+	    if (!(startlist[rrcnt] = calloc(fndims, sizeof(PIO_Offset))))
+		return pio_err(ios, file, PIO_ENOMEM, __FILE__, __LINE__);
+	    if (!(countlist[rrcnt] = calloc(fndims, sizeof(PIO_Offset))))
+		return pio_err(ios, file, PIO_ENOMEM, __FILE__, __LINE__);
 
-                    /* Copy the start/count arrays for this region. */
-                    for (int i = 0; i < fndims; i++)
-                    {
-                        startlist[rrcnt][i] = start[i];
-                        countlist[rrcnt][i] = count[i];
-                        LOG((3, "startlist[%d][%d] = %d countlist[%d][%d] = %d", rrcnt, i,
+	    /* Copy the start/count arrays for this region. */
+	    for (int i = 0; i < fndims; i++)
+	    {
+		startlist[rrcnt][i] = start[i];
+		countlist[rrcnt][i] = count[i];
+		LOG((3, "startlist[%d][%d] = %d countlist[%d][%d] = %d", rrcnt, i,
                              startlist[rrcnt][i], rrcnt, i, countlist[rrcnt][i]));
                     }
                     rrcnt++;
@@ -1641,49 +1719,93 @@ pio_read_darray_nc_serial(file_desc_t *file, io_desc_t *iodesc, int vid,
 
                     /* Read the data. */
                     /* ierr = nc_get_vara(file->fh, vid, start, count, bufptr); */
-                    switch (iodesc->piotype)
-                    {
-                    case PIO_BYTE:
-                        ierr = nc_get_vara_schar(file->fh, vid, start, count, (signed char*)bufptr);
-                        break;
-                    case PIO_CHAR:
-                        ierr = nc_get_vara_text(file->fh, vid, start, count, (char*)bufptr);
-                        break;
-                    case PIO_SHORT:
-                        ierr = nc_get_vara_short(file->fh, vid, start, count, (short*)bufptr);
-                        break;
-                    case PIO_INT:
-                        ierr = nc_get_vara_int(file->fh, vid, start, count, (int*)bufptr);
-                        break;
-                    case PIO_FLOAT:
-                        ierr = nc_get_vara_float(file->fh, vid, start, count, (float*)bufptr);
-                        break;
-                    case PIO_DOUBLE:
-                        ierr = nc_get_vara_double(file->fh, vid, start, count, (double*)bufptr);
-                        break;
+			if (file->iotype == PIO_IOTYPE_Z5)
+			{
+#ifdef _Z5
+				switch (iodesc->piotype)
+				{
+               				 case PIO_INT:
+               				     z5ReadInt32Subarray(vdesc->varname, (int*)bufptr, vdesc->ndims, (size_t *)count, (size_t *)start);
+               				     break;
+               				 case PIO_BYTE:
+               				     z5ReadInt8Subarray(vdesc->varname,(signed char*) bufptr, vdesc->ndims, (size_t *)count, (size_t *)start);
+               				     break;
+               				 case PIO_UBYTE:
+               				     z5ReadUInt8Subarray(vdesc->varname, (unsigned char*) bufptr, vdesc->ndims, (size_t *)count, (size_t *)start);
+               				     break;
+               				 case PIO_SHORT:
+               				     z5ReadInt16Subarray(vdesc->varname, (short*) bufptr, vdesc->ndims, (size_t *)count, (size_t *)start);
+               				     break;
+               				 case PIO_USHORT:
+               				     z5ReadUInt16Subarray(vdesc->varname, (unsigned short*) bufptr, vdesc->ndims, (size_t *)count, (size_t *)start);
+               				     break;
+               				 case PIO_UINT:
+               				     z5ReadUInt32Subarray(vdesc->varname, (unsigned int*) bufptr, vdesc->ndims, (size_t *)count, (size_t *)start);
+               				     break;
+               				 case PIO_INT64:
+               				     z5ReadInt64Subarray(vdesc->varname, (long long*) bufptr, vdesc->ndims, (size_t *)count, (size_t *)start);
+               				     break;
+               				 case PIO_UINT64:
+               				     z5ReadUInt64Subarray(vdesc->varname,(unsigned long long*) bufptr, vdesc->ndims, (size_t *)count, (size_t *)start);
+               				     break;
+               				 case PIO_FLOAT:
+               				     z5ReadFloat32Subarray(vdesc->varname,(float*) bufptr, vdesc->ndims, (size_t *)count, (size_t *)start);
+               				     break;
+               				 case PIO_DOUBLE:
+               				     z5ReadFloat64Subarray(vdesc->varname, (double*) bufptr, vdesc->ndims, (size_t *)count, (size_t *)start);
+               				     break;
+               				 default:
+               				     return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);	
+				}
+#endif
+			}
+			else
+			{
+				
+                   		 switch (iodesc->piotype)
+                   		 {
+                   		 case PIO_BYTE:
+                   		     ierr = nc_get_vara_schar(file->fh, vid, start, count, (signed char*)bufptr);
+                   		     break;
+                   		 case PIO_CHAR:
+                   		     ierr = nc_get_vara_text(file->fh, vid, start, count, (char*)bufptr);
+                   		     break;
+                   		 case PIO_SHORT:
+                   		     ierr = nc_get_vara_short(file->fh, vid, start, count, (short*)bufptr);
+                   		     break;
+                   		 case PIO_INT:
+                   		     ierr = nc_get_vara_int(file->fh, vid, start, count, (int*)bufptr);
+                   		     break;
+                   		 case PIO_FLOAT:
+                   		     ierr = nc_get_vara_float(file->fh, vid, start, count, (float*)bufptr);
+                   		     break;
+                   		 case PIO_DOUBLE:
+                   		     ierr = nc_get_vara_double(file->fh, vid, start, count, (double*)bufptr);
+                   		     break;
 #ifdef _NETCDF4
-                    case PIO_UBYTE:
-                        ierr = nc_get_vara_uchar(file->fh, vid, start, count, (unsigned char*)bufptr);
-                        break;
-                    case PIO_USHORT:
-                        ierr = nc_get_vara_ushort(file->fh, vid, start, count, (unsigned short*)bufptr);
-                        break;
-                    case PIO_UINT:
-                        ierr = nc_get_vara_uint(file->fh, vid, start, count, (unsigned int*)bufptr);
-                        break;
-                    case PIO_INT64:
-                        ierr = nc_get_vara_longlong(file->fh, vid, start, count, (long long*)bufptr);
-                        break;
-                    case PIO_UINT64:
-                        ierr = nc_get_vara_ulonglong(file->fh, vid, start, count, (unsigned long long*)bufptr);
-                        break;
-                    case PIO_STRING:
-                        ierr = nc_get_vara_string(file->fh, vid, start, count, (char**)bufptr);
-                        break;
+                   		 case PIO_UBYTE:
+                   		     ierr = nc_get_vara_uchar(file->fh, vid, start, count, (unsigned char*)bufptr);
+                   		     break;
+                   		 case PIO_USHORT:
+                   		     ierr = nc_get_vara_ushort(file->fh, vid, start, count, (unsigned short*)bufptr);
+                   		     break;
+                   		 case PIO_UINT:
+                   		     ierr = nc_get_vara_uint(file->fh, vid, start, count, (unsigned int*)bufptr);
+                   		     break;
+                   		 case PIO_INT64:
+                   		     ierr = nc_get_vara_longlong(file->fh, vid, start, count, (long long*)bufptr);
+                   		     break;
+                   		 case PIO_UINT64:
+                   		     ierr = nc_get_vara_ulonglong(file->fh, vid, start, count, (unsigned long long*)bufptr);
+                   		     break;
+                   		 case PIO_STRING:
+                   		     ierr = nc_get_vara_string(file->fh, vid, start, count, (char**)bufptr);
+                   		     break;
 #endif /* _NETCDF4 */
-                    default:
-                        return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
+                   		 default:
+                   		     return pio_err(ios, file, PIO_EBADTYPE, __FILE__, __LINE__);
                     }
+			}
 
                     /* Check error code of netCDF call. */
                     if (ierr)

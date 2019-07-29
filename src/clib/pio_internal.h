@@ -154,8 +154,17 @@ extern "C" {
     /* List operations for var_desc_t list. */
     int add_to_varlist(int varid, int rec_var, int pio_type, int pio_type_size,
                        MPI_Datatype mpi_type, int mpi_type_size, var_desc_t **varlist);
+    int addname_to_varlist(char* varname, int varid, var_desc_t **varnamelist);
     int get_var_desc(int varid, var_desc_t **varlist, var_desc_t **var_desc);
+    int get_var_id(const char* varname, var_desc_t **varnamelist, int* varidp);
     int delete_var_desc(int varid, var_desc_t **varlist);
+
+    void dimid_add_to_dim_list(int dimid,char* dimname, int dimval, dim_desc_t** dimlist);
+    int dimid_get_dim(int dimid, dim_desc_t **dimlist, dim_desc_t **dim_desc);
+    int dimname_add_to_dim_list(char* dimname, int dimid, int dimval, dim_desc_t** dimlist);
+    int dimname_inq_dimid(const char* dimname, int *dimid, dim_desc_t **dimlist, dim_desc_t **dim_desc);
+    
+    int dimid_inq_dimname(int dimid, const char* dimname, dim_desc_t **dimlist);
 
     /* Create a file (internal function). */
     int PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename, int mode);

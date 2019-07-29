@@ -117,11 +117,11 @@
 
 typedef struct dim_desc_t
 {
-    char dimname[MAX_Z5_DIMNAME_LEN_Z5];
+    char* dimname;
 
     int dimid;
 
-    int dimval;
+    PIO_Offset dimval;
 
     /** Hash table entry. */
     UT_hash_handle hh;
@@ -586,6 +586,10 @@ typedef struct wmulti_buffer
  */
 typedef struct file_desc_t
 {
+    int natts;
+    int unlimitedid;
+    int dimid_curr;
+    int varid_curr;
     /** The IO system ID used to open this file. */
     iosystem_desc_t *iosystem;
 
@@ -604,6 +608,13 @@ typedef struct file_desc_t
 
     /** List of variables in this file. */
     struct var_desc_t *varlist;
+    struct var_desc_t *varnamelist;
+
+    /** List of dims in this file*/
+    struct dim_desc_t *dimidlist;
+    
+    /** List of dims in this file*/
+    struct dim_desc_t *dimnamelist;
 
     /** Number of variables. */
     int nvars;

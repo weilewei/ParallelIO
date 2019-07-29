@@ -460,6 +460,11 @@ int PIOc_sync(int ncid)
                 if (ios->io_rank == 0)
                     ierr = nc_sync(file->fh);
                 break;
+#ifdef _Z5
+            case PIO_IOTYPE_Z5:
+                ierr = 0;
+                break;
+#endif
 #ifdef _PNETCDF
             case PIO_IOTYPE_PNETCDF:
                 flush_output_buffer(file, true, 0);

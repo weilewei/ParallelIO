@@ -1811,6 +1811,9 @@ PIOc_createfile_int(int iosysid, int *ncidp, int *iotype, const char *filename,
     file->iotype = *iotype;
     file->buffer = NULL;
     file->writable = 1;
+    file->natts = 0;
+    file->dimid_curr = 0;
+    file->varid_curr = 0;
 #ifdef _Z5
     char* filenametmp = (char*) malloc (1 + strlen(filename) + strlen(Z5FILEEXTENSION) );
     strcpy(filenametmp, filename);
@@ -2274,7 +2277,7 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
     /* User must provide valid input for these parameters. */
     if (!ncidp || !iotype || !filename)
         return pio_err(ios, NULL, PIO_EINVAL, __FILE__, __LINE__);
-    if (*iotype < PIO_IOTYPE_PNETCDF || *iotype > PIO_IOTYPE_NETCDF4P)
+    if (*iotype < PIO_IOTYPE_PNETCDF || *iotype > PIO_IOTYPE_Z5)
         return pio_err(ios, NULL, PIO_EINVAL, __FILE__, __LINE__);
 
     LOG((2, "PIOc_openfile_retry iosysid = %d iotype = %d filename = %s mode = %d retry = %d",
@@ -2289,7 +2292,6 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
     file->iotype = *iotype;
     file->iosystem = ios;
     file->writable = (mode & PIO_WRITE) ? 1 : 0;
-
     /* Set to true if this task should participate in IO (only true
      * for one task with netcdf serial files. */
     if (file->iotype == PIO_IOTYPE_NETCDF4P || file->iotype == PIO_IOTYPE_PNETCDF ||
@@ -2366,7 +2368,10 @@ PIOc_openfile_retry(int iosysid, int *ncidp, int *iotype, const char *filename,
             }
             break;
 #endif /* _NETCDF4 */
-
+#ifdef _Z5
+	case PIO_IOTYPE_Z5:
+	    file->iotype = PIO_IOTYPE_NETCDF;
+#endif
         case PIO_IOTYPE_NETCDF:
             if (ios->io_rank == 0)
             {

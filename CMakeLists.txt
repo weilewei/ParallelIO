@@ -137,7 +137,7 @@ if (DEFINED Z5_DIR)
     SET(COMPRESSION_LIBRARIES "${COMPRESSION_LIBRARIES};${ZLIB_LIBRARIES}")
   endif()
   #CXX 11
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++14")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -cxxlib=/glade/u/home/weile/miniconda3/envs/z5-py36/ -pthread /glade/u/home/weile/miniconda3/envs/z5-py36/lib/libstdc++.so")
   message(${CMAKE_CXX_FLAGS})
   set(CMAKE_CXX_STANDARD_REQUIRED ON)
   #MARRAY
