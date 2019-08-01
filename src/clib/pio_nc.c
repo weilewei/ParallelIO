@@ -2367,6 +2367,10 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
     MPI_Datatype mpi_type;     /* The correspoding MPI type. */
     int mpi_type_size;         /* Size of mpi type. */
     int mpierr = MPI_SUCCESS, mpierr2;  /* Return code from MPI function codes. */
+    long int *shape = NULL;
+    long int *chunk = NULL;
+    long int *shape1 = NULL;
+    long int *chunk1 = NULL;
     int ierr;                  /* Return code from function calls. */
 
 
@@ -2527,24 +2531,26 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
 #endif /* _NETCDF4 */
 
 #ifdef _Z5
-        if (file->iotype == PIO_IOTYPE_Z5 && !ios->io_rank && file->iotype)
+        if (file->iotype == PIO_IOTYPE_Z5 && file->iotype)
         {
             //TODO: Z5Z5
-            size_t *shape;
-            size_t *chunk;
-            size_t *shape1 = NULL;
-            size_t *chunk1 = NULL;
             size_t size = 1; 
+            int time_var;
             int useZlib = 1;
             int niostasks = ios->num_iotasks;
             if (ndims > 0)
             {
-                shape = malloc( ndims * sizeof(size_t));
-                chunk = malloc( ndims * sizeof(size_t));
+                shape = malloc( ndims * sizeof(long int));
+                chunk = malloc( ndims * sizeof(long int));
+            }
+            else if (ndims == 0){
+	       shape1 = malloc(sizeof(long int));
+	       chunk1 = malloc(sizeof(long int));
+	       *shape1 = 1;
+	       *chunk1 = 1;
             }
             for (int i = 0; i < ndims; i++)
             {
-                size *= shape[i];
                 if ((ierr = dimid_get_dim(dimidsp[i], &file->dimidlist, &dim)))
                     return ierr;
                 //fprintf(stderr,"def_var %s,i= %d,dimid = %d,dim len = %d\n",datasetname,i,dimidsp[i],dim->dimval);
@@ -2556,6 +2562,7 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                 {
                     shape[i] = dim->dimval;
                 }
+                size *= shape[i];
                 if (ndims == 1 )
                 {
                     if (shape[i] > 96)
@@ -2563,7 +2570,7 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                     else
                        chunk[i] = shape[i];
                     
-                    //fprintf(stderr,"dim 1 %d,chunk = %d, shape = %d\n",i,chunk[i],shape[i]);
+                    fprintf(stderr,"dim 1 %d,chunk = %d, shape = %d\n",i,chunk[i],shape[i]);
                 }
                 else if (ndims == 2)
                 {
@@ -2573,65 +2580,70 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                         chunk[i] = shape[i];
                     else if ( i > 0 )
                         chunk[i] = shape[i];
-                    //fprintf(stderr,"dim 2 %d,chunk = %d, shape = %d\n",i,chunk[i],shape[i]);
+                    fprintf(stderr,"dim 2 %d,chunk = %d, shape = %d\n",i,chunk[i],shape[i]);
                 }
                 else //ndims > 2
-                {   if (i == 1)
+                {   if ( i == 0 && dim->dimval == PIO_UNLIMITED){
+                       time_var = 1;
+                       chunk[i] = 1;
+                    }
+                    else if( i == 0 && dim->dimval != PIO_UNLIMITED){
+                       chunk[i] = shape[i] / (niostasks-1);
+                       time_var = 0;
+                    }
+                    if (i == 1 && time_var == 1)
                         chunk[i] = shape[i] / (niostasks-1);
-                    //else if ( i > 1 )
-                    //    chunk[i] = shape[i];
-                    else
+                    else if ( i == 1 && time_var == 0) 
                         chunk[i] = shape[i];
-                    //fprintf(stderr,"dim 3 %d,chunk = %d, shape = %d\n",i,chunk[i],shape[i]);
+                    if ( i > 1) 
+                        chunk[i] = shape[i];
+                    fprintf(stderr,"dim 3 %d,chunk = %d, shape = %d\n",i,chunk[i],shape[i]);
                 }
 
             }
             //useZlib = size < 16 ? 0 : 1;
+            if (!ios->io_rank){
             if (ndims == 0)
             {
-	       shape1 = malloc(sizeof(size_t));
-	       chunk1 = malloc(sizeof(size_t));
-	       *shape1 = 1;
-	       *chunk1 = 1;
                 switch (xtype)
                 {
                     case NC_BYTE:
-                        z5CreateInt8Dataset(datasetname, ndims, shape1, chunk1, 0, 1);
+                        z5CreateInt8Dataset(datasetname, ndims, (size_t*)shape1, (size_t*)chunk1, 0, 1);
                         break;
                     case NC_UBYTE:
                     case NC_CHAR:
-                        z5CreateUInt8Dataset(datasetname, ndims, shape1, chunk1, 0, 1);
+                        z5CreateUInt8Dataset(datasetname, ndims, (size_t*)shape1, (size_t*)chunk1, 0, 1);
                         break;
                     case NC_SHORT:
-                        z5CreateInt16Dataset(datasetname, ndims, shape1, chunk1, 0, 1);
+                        z5CreateInt16Dataset(datasetname, ndims, (size_t*)shape1, (size_t*)chunk1, 0, 1);
                         break;
                     case NC_USHORT:
-                        z5CreateUInt16Dataset(datasetname, ndims, shape1, chunk1, 0, 1);
+                        z5CreateUInt16Dataset(datasetname, ndims, (size_t*)shape1, (size_t*)chunk1, 0, 1);
                         break;
                     case NC_INT:
-                        z5CreateInt32Dataset(datasetname, ndims, shape1, chunk1, 0, 1);
+                        z5CreateInt32Dataset(datasetname, ndims, (size_t*)shape1, (size_t*)chunk1, 0, 1);
                         break;
                     case NC_UINT:
-                        z5CreateUInt32Dataset(datasetname, ndims, shape1, chunk1, 0, 1);
+                        z5CreateUInt32Dataset(datasetname, ndims, (size_t*)shape1, (size_t*)chunk1, 0, 1);
                         break;
                     case NC_INT64:
-                        z5CreateInt64Dataset(datasetname, ndims, shape1, chunk1, 0, 1);
+                        z5CreateInt64Dataset(datasetname, ndims, (size_t*)shape1, (size_t*)chunk1, 0, 1);
                         break;
                     case NC_UINT64:
-                        z5CreateUInt64Dataset(datasetname, ndims, shape1, chunk1, 0, 1);
+                        z5CreateUInt64Dataset(datasetname, ndims, (size_t*)shape1, (size_t*)chunk1, 0, 1);
                         break;
                     case NC_FLOAT:
-                        z5CreateFloat32Dataset(datasetname, ndims, shape1, chunk1, 0, 1);
+                        z5CreateFloat32Dataset(datasetname, ndims, (size_t*)shape1, (size_t*)chunk1, 0, 1);
                         break;
                     case NC_DOUBLE:
-                        z5CreateFloat64Dataset(datasetname, ndims, shape1, chunk1, 0, 1);
+                        z5CreateFloat64Dataset(datasetname, ndims, (size_t*)shape1, (size_t*)chunk1, 0, 1);
                         break;
                     default:
                         return pio_err(ios, file, NC_EBADTYPE, __FILE__, __LINE__);
                 }
                
-		free(shape1);
-		free(chunk1);
+		//free(shape1);
+		//free(chunk1);
 
             }
             else if (ndims > 0)
@@ -2639,41 +2651,41 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
                 switch (xtype)
                 {
                     case NC_BYTE:
-                        z5CreateInt8Dataset(datasetname, ndims, shape, chunk, useZlib, 1);
+                        z5CreateInt8Dataset(datasetname, ndims, (size_t*)shape, (size_t*)chunk, useZlib, 1);
                         break;
                     case NC_UBYTE:
                     case NC_CHAR:
-                        z5CreateUInt8Dataset(datasetname, ndims, shape, chunk, useZlib, 1);
+                        z5CreateUInt8Dataset(datasetname, ndims, (size_t*)shape, (size_t*)chunk, useZlib, 1);
                         break;
                     case NC_SHORT:
-                        z5CreateInt16Dataset(datasetname, ndims, shape, chunk, useZlib, 1);
+                        z5CreateInt16Dataset(datasetname, ndims, (size_t*)shape, (size_t*)chunk, useZlib, 1);
                         break;
                     case NC_USHORT:
-                        z5CreateUInt16Dataset(datasetname, ndims, shape, chunk, useZlib, 1);
+                        z5CreateUInt16Dataset(datasetname, ndims, (size_t*)shape, (size_t*)chunk, useZlib, 1);
                         break;
                     case NC_INT:
-                        z5CreateInt32Dataset(datasetname, ndims, shape, chunk, useZlib, 1);
+                        z5CreateInt32Dataset(datasetname, ndims, (size_t*)shape, (size_t*)chunk, useZlib, 1);
                         break;
                     case NC_UINT:
-                        z5CreateUInt32Dataset(datasetname, ndims, shape, chunk, useZlib, 1);
+                        z5CreateUInt32Dataset(datasetname, ndims, (size_t*)shape, (size_t*)chunk, useZlib, 1);
                         break;
                     case NC_INT64:
-                        z5CreateInt64Dataset(datasetname, ndims, shape, chunk, useZlib, 1);
+                        z5CreateInt64Dataset(datasetname, ndims, (size_t*)shape, (size_t*)chunk, useZlib, 1);
                         break;
                     case NC_UINT64:
-                        z5CreateUInt64Dataset(datasetname, ndims, shape, chunk, useZlib, 1);
+                        z5CreateUInt64Dataset(datasetname, ndims, (size_t*)shape, (size_t*)chunk, useZlib, 1);
                         break;
                     case NC_FLOAT:
-                        z5CreateFloat32Dataset(datasetname, ndims, shape, chunk, useZlib, 1);
+                        z5CreateFloat32Dataset(datasetname, ndims, (size_t*)shape, (size_t*)chunk, useZlib, 1);
                         break;
                     case NC_DOUBLE:
-                        z5CreateFloat64Dataset(datasetname, ndims, shape, chunk, useZlib, 1);
+                        z5CreateFloat64Dataset(datasetname, ndims, (size_t*)shape, (size_t*)chunk, useZlib, 1);
                         break;
                     default:
                         return pio_err(ios, file, NC_EBADTYPE, __FILE__, __LINE__);
                 }
-                free(shape);
-                free(chunk);
+                //free(shape);
+                //free(chunk);
             }
             else {
                 // TODO: Z5Z5
@@ -2681,6 +2693,7 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
             }
             varid = file->varid_curr++;
             ierr =  0;
+        }
         }
 #endif
     }
@@ -2708,6 +2721,18 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
     file->nvars++;
 
 #ifdef _Z5
+    if (ios->ioproc){  
+    //if (ndims >0 && !ios->io_rank ){
+    //fprintf(stderr,"shape[0] =  %d,chunk[0]=%d,%d,%d\n",shape[0],chunk[0],sizeof(PIO_Offset),sizeof(size_t));
+    //if ((mpierr = MPI_Bcast((PIO_Offset *)shape, ndims, MPI_OFFSET, ios->ioroot, ios->my_comm)))
+    //    check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+    //if ((mpierr = MPI_Bcast((PIO_Offset *)chunk, ndims, MPI_OFFSET, ios->ioroot, ios->my_comm)))
+    //    check_mpi(NULL, file, mpierr, __FILE__, __LINE__);
+   // }
+    if (ndims >0)
+       fprintf(stderr,"1 shape[0] =  %d\n",shape[0]);
+    else
+       fprintf(stderr,"0 shape1[0] =  %d\n",shape1[0]);
     var_desc_t *vdesc;
     if ((ierr = get_var_desc(varid, &file->varlist, &vdesc)))
         return pio_err(ios, file, ierr, __FILE__, __LINE__);
@@ -2718,14 +2743,27 @@ PIOc_def_var(int ncid, const char *name, nc_type xtype, int ndims,
     if (ndims > 0)
     {
 	vdesc->dimidsp = malloc(ndims*sizeof(int));
+	vdesc->shape = malloc(ndims*sizeof(long int));
+	vdesc->chunk = malloc(ndims*sizeof(long int));
 	for (int d=0; d<ndims;d++)
-	{    
+	{    vdesc->shape[d] = (long int*)shape[d];
+             vdesc->chunk[d] = (long int*)chunk[d]; 
              vdesc->dimidsp[d] = dimidsp[d];
 	} 
+        free(shape);
+        free(chunk);
     } 
-    else
-        vdesc->dimidsp = NULL; 
+    else{
+	vdesc->shape = malloc(sizeof(long int));
+	vdesc->chunk = malloc(sizeof(long int));
+        vdesc->shape[0]=1;
+        vdesc->chunk[0]=1;
+        vdesc->dimidsp = NULL;
+        free(shape1);
+        free(chunk1);
+    } 
     vdesc->natts = 0;
+    }
     ierr = 0;
 #endif
     free(datasetname);

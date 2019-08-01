@@ -1374,7 +1374,7 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
             {
                 if (ios->iomaster == MPI_ROOT)
                 {
-                    //fprintf(stderr,"varname = %s, id =%d, xtype = %d,ndims=%d\n",vdesc->varname,varid,vdesc->xtypep,ndims);
+                    fprintf(stderr,"dim = 0,varname = %s, id =%d, xtype = %d,ndims=%d\n",vdesc->varname,varid,vdesc->xtypep,ndims);
 		    switch(xtype)
 		    {
 			case NC_INT:
@@ -1423,13 +1423,13 @@ PIOc_put_vars_tc(int ncid, int varid, const PIO_Offset *start, const PIO_Offset 
                 //{
                     size_t *count1=malloc(ndims*sizeof(size_t));
                     for ( int d = 0; d < ndims; d++){
-                        if (count[d] == 22)
-                           count1[d] = 21;
-                        else if( count[d] == 4)
-                           count1[d] = 3;
+                        if (count[d] > vdesc->chunk[d])
+                           count1[d] = vdesc->chunk[d];
+                        //else if( count[d] == 4)
+                        //   count1[d] = 3;
                         else
                            count1[d] = count[d];
-                        //fprintf(stderr,"dim > 0,varname = %s, id =%d, xtype = %d,count[%d]=%d\n",vdesc->varname,varid,vdesc->xtypep,d,count[d]);
+                        fprintf(stderr,"dim > 0,varname = %s, id =%d, count[%d]=%d,chunk[%d]=%d,count1[%d]=%d\n",vdesc->varname,varid,d,count[d],d,vdesc->chunk[d],d,count1[d]);
                     } 
 		    switch(xtype)
 		    {

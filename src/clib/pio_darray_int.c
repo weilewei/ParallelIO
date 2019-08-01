@@ -519,13 +519,13 @@ write_darray_multi_par(file_desc_t *file, int nvars, int fndims, const int *vari
 			    for (int i = 0; i < vdesc->ndims; i++)
 			    {
 				tmp2 *= count[i];
-				//fprintf(stderr,"%s,region->start = %d, count = %d\n",vdesc->varname,start[i],count[i]);
-				if (count[i] == 22)
-				   count1[i] = 21;
-				else if (count[i] == 4)
-				   count1[i] =3;
+				if ((count[i] != 0 )&&( count[i] > vdesc->chunk[i]))
+				   count1[i] = vdesc->chunk[i];
+				//else if (count[i] == 4)
+				//   count1[i] =3;
 				else
 				   count1[i] = count[i];
+				fprintf(stderr,"%s,%d,region->start = %d, count = %d chunk = %d tmp2=%d,count1= %d\n",vdesc->varname,i,start[i],count[i],vdesc->chunk[i],tmp2,count1[i]);
 			    }
 			    if (tmp2 > 0)
 			    {

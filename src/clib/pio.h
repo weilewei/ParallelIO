@@ -135,7 +135,8 @@ typedef struct dim_desc_t
 typedef struct var_desc_t
 {
     char* varname;
-
+    long int* shape;
+    long int* chunk;
     struct dim_desc_t *dim_desc_t;
 
     int ndims;
