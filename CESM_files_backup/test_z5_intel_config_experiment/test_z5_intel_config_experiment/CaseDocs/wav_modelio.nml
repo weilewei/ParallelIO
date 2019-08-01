@@ -1,0 +1,13 @@
+&modelio
+  diri = "/glade/scratch/weile/test_z5_intel_config_experiment/bld/wav"
+  diro = "/glade/scratch/weile/test_z5_intel_config_experiment/run"
+  logfile = "wav.log.7398132.chadmin1.ib0.cheyenne.ucar.edu.190801-010154"
+/
+&pio_inparm
+  pio_netcdf_format = "64bit_offset"
+  pio_numiotasks = -99
+  pio_rearranger = 1
+  pio_root = 1
+  pio_stride = 36
+  pio_typename = "z5"
+/

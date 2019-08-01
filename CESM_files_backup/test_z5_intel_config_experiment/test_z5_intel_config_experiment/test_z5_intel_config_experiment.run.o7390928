@@ -1,0 +1,165 @@
+Setting resource.RLIMIT_STACK to -1 from (-1, -1)
+Generating namelists for /glade/u/home/weile/testcases_cesm/test_z5_intel_config_experiment
+Creating component namelists
+  2019-07-31 10:45:18 atm
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/../components/cam//cime_config/buildnml
+CAM namelist copy: file1 /glade/u/home/weile/testcases_cesm/test_z5_intel_config_experiment/Buildconf/camconf/atm_in file2 /glade/scratch/weile/test_z5_intel_config_experiment/run/atm_in 
+  2019-07-31 10:45:19 lnd
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/slnd/cime_config/buildnml
+  2019-07-31 10:45:19 ice
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sice/cime_config/buildnml
+  2019-07-31 10:45:19 ocn
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/data_comps/docn/cime_config/buildnml
+  2019-07-31 10:45:19 rof
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/srof/cime_config/buildnml
+  2019-07-31 10:45:19 glc
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sglc/cime_config/buildnml
+  2019-07-31 10:45:19 wav
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/swav/cime_config/buildnml
+  2019-07-31 10:45:19 esp
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sesp/cime_config/buildnml
+  2019-07-31 10:45:19 cpl
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/drivers/mct/cime_config/buildnml
+Finished creating component namelists
+-------------------------------------------------------------------------
+ - Prestage required restarts into /glade/scratch/weile/test_z5_intel_config_experiment/run
+ - Case input data directory (DIN_LOC_ROOT) is /glade/p/cesmdata/cseg/inputdata 
+ - Checking for required input datasets in DIN_LOC_ROOT
+-------------------------------------------------------------------------
+run command is mpiexec_mpt  -np 1152  omplace -tm open64  /glade/scratch/weile/test_z5_intel_config_experiment/bld/cesm.exe  >> cesm.log.$LID 2>&1  
+Detected model run failed, restarting
+Creating component namelists
+  2019-07-31 10:46:13 atm
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/../components/cam//cime_config/buildnml
+CAM namelist copy: file1 /glade/u/home/weile/testcases_cesm/test_z5_intel_config_experiment/Buildconf/camconf/atm_in file2 /glade/scratch/weile/test_z5_intel_config_experiment/run/atm_in 
+  2019-07-31 10:46:13 lnd
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/slnd/cime_config/buildnml
+  2019-07-31 10:46:13 ice
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sice/cime_config/buildnml
+  2019-07-31 10:46:13 ocn
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/data_comps/docn/cime_config/buildnml
+  2019-07-31 10:46:13 rof
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/srof/cime_config/buildnml
+  2019-07-31 10:46:13 glc
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sglc/cime_config/buildnml
+  2019-07-31 10:46:13 wav
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/swav/cime_config/buildnml
+  2019-07-31 10:46:13 esp
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sesp/cime_config/buildnml
+  2019-07-31 10:46:13 cpl
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/drivers/mct/cime_config/buildnml
+Finished creating component namelists
+Detected model run failed, restarting
+Creating component namelists
+  2019-07-31 10:47:13 atm
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/../components/cam//cime_config/buildnml
+CAM namelist copy: file1 /glade/u/home/weile/testcases_cesm/test_z5_intel_config_experiment/Buildconf/camconf/atm_in file2 /glade/scratch/weile/test_z5_intel_config_experiment/run/atm_in 
+  2019-07-31 10:47:13 lnd
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/slnd/cime_config/buildnml
+  2019-07-31 10:47:13 ice
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sice/cime_config/buildnml
+  2019-07-31 10:47:13 ocn
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/data_comps/docn/cime_config/buildnml
+  2019-07-31 10:47:13 rof
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/srof/cime_config/buildnml
+  2019-07-31 10:47:13 glc
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sglc/cime_config/buildnml
+  2019-07-31 10:47:13 wav
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/swav/cime_config/buildnml
+  2019-07-31 10:47:13 esp
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sesp/cime_config/buildnml
+  2019-07-31 10:47:13 cpl
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/drivers/mct/cime_config/buildnml
+Finished creating component namelists
+Detected model run failed, restarting
+Creating component namelists
+  2019-07-31 10:48:07 atm
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/../components/cam//cime_config/buildnml
+CAM namelist copy: file1 /glade/u/home/weile/testcases_cesm/test_z5_intel_config_experiment/Buildconf/camconf/atm_in file2 /glade/scratch/weile/test_z5_intel_config_experiment/run/atm_in 
+  2019-07-31 10:48:07 lnd
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/slnd/cime_config/buildnml
+  2019-07-31 10:48:07 ice
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sice/cime_config/buildnml
+  2019-07-31 10:48:07 ocn
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/data_comps/docn/cime_config/buildnml
+  2019-07-31 10:48:07 rof
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/srof/cime_config/buildnml
+  2019-07-31 10:48:07 glc
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sglc/cime_config/buildnml
+  2019-07-31 10:48:07 wav
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/swav/cime_config/buildnml
+  2019-07-31 10:48:07 esp
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sesp/cime_config/buildnml
+  2019-07-31 10:48:07 cpl
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/drivers/mct/cime_config/buildnml
+Finished creating component namelists
+Detected model run failed, restarting
+Creating component namelists
+  2019-07-31 10:49:07 atm
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/../components/cam//cime_config/buildnml
+CAM namelist copy: file1 /glade/u/home/weile/testcases_cesm/test_z5_intel_config_experiment/Buildconf/camconf/atm_in file2 /glade/scratch/weile/test_z5_intel_config_experiment/run/atm_in 
+  2019-07-31 10:49:07 lnd
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/slnd/cime_config/buildnml
+  2019-07-31 10:49:07 ice
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sice/cime_config/buildnml
+  2019-07-31 10:49:07 ocn
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/data_comps/docn/cime_config/buildnml
+  2019-07-31 10:49:07 rof
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/srof/cime_config/buildnml
+  2019-07-31 10:49:07 glc
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sglc/cime_config/buildnml
+  2019-07-31 10:49:07 wav
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/swav/cime_config/buildnml
+  2019-07-31 10:49:07 esp
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sesp/cime_config/buildnml
+  2019-07-31 10:49:07 cpl
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/drivers/mct/cime_config/buildnml
+Finished creating component namelists
+Detected model run failed, restarting
+Creating component namelists
+  2019-07-31 10:50:10 atm
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/../components/cam//cime_config/buildnml
+CAM namelist copy: file1 /glade/u/home/weile/testcases_cesm/test_z5_intel_config_experiment/Buildconf/camconf/atm_in file2 /glade/scratch/weile/test_z5_intel_config_experiment/run/atm_in 
+  2019-07-31 10:50:10 lnd
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/slnd/cime_config/buildnml
+  2019-07-31 10:50:10 ice
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sice/cime_config/buildnml
+  2019-07-31 10:50:10 ocn
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/data_comps/docn/cime_config/buildnml
+  2019-07-31 10:50:10 rof
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/srof/cime_config/buildnml
+  2019-07-31 10:50:10 glc
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sglc/cime_config/buildnml
+  2019-07-31 10:50:10 wav
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/swav/cime_config/buildnml
+  2019-07-31 10:50:10 esp
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sesp/cime_config/buildnml
+  2019-07-31 10:50:10 cpl
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/drivers/mct/cime_config/buildnml
+Finished creating component namelists
+Detected model run failed, restarting
+Creating component namelists
+  2019-07-31 10:51:36 atm
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/../components/cam//cime_config/buildnml
+CAM namelist copy: file1 /glade/u/home/weile/testcases_cesm/test_z5_intel_config_experiment/Buildconf/camconf/atm_in file2 /glade/scratch/weile/test_z5_intel_config_experiment/run/atm_in 
+  2019-07-31 10:51:36 lnd
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/slnd/cime_config/buildnml
+  2019-07-31 10:51:36 ice
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sice/cime_config/buildnml
+  2019-07-31 10:51:36 ocn
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/data_comps/docn/cime_config/buildnml
+  2019-07-31 10:51:36 rof
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/srof/cime_config/buildnml
+  2019-07-31 10:51:36 glc
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sglc/cime_config/buildnml
+  2019-07-31 10:51:36 wav
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/swav/cime_config/buildnml
+  2019-07-31 10:51:36 esp
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/components/stub_comps/sesp/cime_config/buildnml
+  2019-07-31 10:51:36 cpl
+   Calling /glade/u/home/weile/my_cesm_sandbox2/cime/src/drivers/mct/cime_config/buildnml
+Finished creating component namelists
+check for resubmit
+dout_s False 
+mach cheyenne 
+resubmit_num 0
